@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+
+'''
+# Copyright (C) 2017  Bitvis AS
+#
+# This file is part of KREM.
+#
+# KREM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# KREM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with KREM.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Bitvis AS 
+# www.bitvis.no
+# info@bitvis.no
+'''
+
+
+
+'''
+description: 
+    Executes target job or task
+'''
+
+import argparse
+
+from krempack.core.commands import run
+
+
+
+#######################################
+# Argument parser.
+#          Uses library argparse              
+#######################################
+def readArgs():
+    parser = argparse.ArgumentParser(description=
+                                    "Run a job, or selection of tasks",
+                                    prog='krem run')
+    # Add arguments here
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-j", "--job", nargs=1, help="Execute target job")
+#Disabled for v1.0.0    group.add_argument("-c", "--tasks", nargs='+', help="Execute target tasks")
+    group.add_argument("--all", default=False, action='store_true', help="Execute all tasks")
+
+    args = parser.parse_args()
+
+    return args
+
+
+if __name__ == '__main__':
+
+    args = readArgs()
+    
+    if args.job is not None:
+        ret = run.run_job(args.job[0])
+#    elif args.tasks is not None:
+# Disabled for v1.0.0        ret = run.run_tasks('run_selected', args.tasks)        
+    elif args.all:
+        ret = run.run_all_tasks('run_all')
+    else:
+        print("\nNo target provided. run 'krem.run --help' for more information\n")
+        exit(1)
+
+    exit(ret)        
+
+    
+
+

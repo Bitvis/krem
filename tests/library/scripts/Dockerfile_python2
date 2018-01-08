@@ -1,0 +1,7 @@
+FROM python:2
+
+WORKDIR /usr/src/app
+
+COPY krem /usr/src/app/krem
+
+CMD ["bash", "/usr/src/app/krem/tests/library/scripts/run_tests.sh"]

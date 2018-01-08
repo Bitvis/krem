@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+'''
+# Copyright (C) 2017  Bitvis AS
+#
+# This file is part of KREM.
+#
+# KREM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# KREM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with KREM.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Bitvis AS 
+# www.bitvis.no
+# info@bitvis.no
+'''
+
+
+'''
+description:
+    Lists available tasks, jobs, etc..
+'''
+
+import argparse
+import os
+from krempack.core.commands import list
+from krempack.common import constants as c
+
+def readArgs():
+    parser = argparse.ArgumentParser(description=
+                                    "List available targets:",
+                                    prog='krem list') 
+
+    # Add arguments here
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-t", "--task", default=False, action='store_true', help="List available tasks")
+    group.add_argument("-j", "--job", default=False, action='store_true', help="List available jobs")
+
+    args = parser.parse_args()
+
+    return args
+
+if __name__ == '__main__':
+
+    args = readArgs()
+
+    if args.task:
+        list.list_tasks()
+    elif args.job:
+        list.list_jobs()
+    else:
+        print("\nNo target provided. run 'krem.list --help' for more information\n")
+        exit(1)
+
+
+

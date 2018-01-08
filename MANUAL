@@ -1,0 +1,333 @@
+# Copyright (C) 2017  Bitvis AS
+#
+# This file is part of KREM.
+#
+# KREM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# KREM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with KREM.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Bitvis AS 
+# www.bitvis.no
+# info@bitvis.no
+
+
+------------------------------------------------------------------
+ABOUT THIS MANUAL
+------------------------------------------------------------------
+This manual covers KREM v1.0.0
+
+
+
+
+------------------------------------------------------------------
+INSTALLATION
+------------------------------------------------------------------
+
+Clone or copy KREM to any location and run:
+./setup.sh
+
+In case the above script fails update the PATH and PYTHONPATH environment variables as follows:
+
+export PATH=$PATH:<path to krem>/krem
+export PYTHONPATH=$PYTHONPATH:<path to krem>/krem
+
+Hint: add the above lines to the ~/.bashrc file and the paths will be setup automatically every time you open a new terminal.
+
+------------------------------------------------------------------
+USAGE
+------------------------------------------------------------------
+
+$ krem --help
+
+Available commands:
+- init
+- run
+- list
+
+for more information, execute: krem <cmd> --help
+
+$ krem init --help
+$ krem list --help
+$ krem run  --help
+
+
+------------------------------------------------------------------
+TUTORIAL
+------------------------------------------------------------------
+
+1. Create your first project 'project_foo'
+	To create a project 'project_foo' run: 
+
+	$ krem init -p project_foo
+
+	A directory 'project_foo' is created with several subdirectories: 
+	'config  library  output  jobs  tasks' 
+	Each directory will be explained later in this tutorial.
+
+
+2. Enter 'project_foo'
+	
+	$ cd project_foo
+
+
+3. Create your first job 'job_foo'
+	A job is a list of tasks run in series, in parallel or a combination of both.
+	The order is specified by the user.
+	Each job has its own directory which is located in the 'jobs' directory. 
+	When a job is created, a template file 'job.py' is placed in the job directory.
+	To create a job 'job_foo' run:
+
+	$ krem init -j job_foo
+	
+	This will create a job directory 'jobs/job_foo' and place a 'job.py' file in the directory.
+
+
+4. Quick look at the 'job.py' file
+	Open the 'jobs/job_foo/job.py file and take a quick look.
+	The content of the file is explained later in this tutorial.
+
+
+5. Create your first task 'task_foo'
+	Each task has its own directory which is located in the 'tasks' directory. 
+	When a task is created, a template file 'run.py' is placed in the task directory.
+	To create a 'task_foo' task run:
+
+	$ krem init -t task_foo
+
+	This will create a task directory 'tasks/task_foo/' and place the files 'run.py', '__init__.py', and 'setup.txt' in the directory.
+	Note the keyword 'TASK_FILE' in 'setup.txt'. This points to the python script to be executed within the task. In this task, it is the
+	file 'run.py'. 
+
+
+6. Quick look at the 'run.py' file
+	Open the 'tasks/task_foo/run.py' file and take a look.
+	This template file can be run for demonstration without modification.
+	Study the file for few seconds.
+	Note the return error codes. A task can return at any point with a appropriate error code.
+
+
+7. Write your first job
+	Now go back to the file 'job.py' in directory 'job_foo'.
+	
+	In most situations you will work only with the functions job.run_task_serial(...) and job.run_task_parallel(...). 	
+	# job.run_task_serial(<task>, <function>, [variables])
+
+	To add a task to the job, simply change the text 'example_task' to the name of the target task, and
+	change the text 'example_function_with_variables' or 'example_function' with the function in your task script you
+	want to run.
+
+	Add the 'task_foo' to the job four times. Ensure they are placed between the function calls job.start() and job.end()
+	
+	job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
+	job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run in parallel")])
+	job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run in parallel")])
+	job.update_on_complete()
+	job.run_task_serial('task_foo', 'run_without_variables')
+	
+	The first line specifies that the task 'task_foo' will be run as the first task.
+	It also specifies an optional list of variables. In this task there are two variables, but any number or none variables are allowed.
+	After the first tasks has finished, tasks on line 2 and 3 will be run in parallel. These tasks execute the function 
+	'run_with_named_variables', which expect two variables with the name 'var1' and 'var2'. job.update_on_complete() on line 4 waits until the 
+	parallel tasks have finished, and performs the required post processing. This function will also return 'True' only if all the 
+	parallel tasks passed. The task on line 5 will execute when the previous parallel tasks are complete.
+
+	
+8. Run your first job 
+	To run 'job_foo' run:
+
+	$ krem run -j job_foo 
+
+	Optionally, you can first call:
+	
+	$ krem list -j
+
+	All available jobs are listed with a number ID (if 'job_foo' is the only available job, it will have the number ID '0').
+	To run 'job_foo' with number ID, run:
+
+	$ krem run -j 0
+
+	The job is run and when it finish, a report is output. Hopefully your task passed :-)
+
+9. Job return code
+	The return codes from the job are explained in the 'job.py' file
+	
+
+10. Find your task results
+	Each time a job is run, the result and logs are written to a new directory in the 'output' directory.
+	Change to 'output' directory and list all entries:
+
+	$ cd output
+	$ ls -l
+
+	-rw-rw-r-- 1 andreas andreas   41 nov.  24 14:48 info.txt
+	drwxrwxr-x 4 andreas andreas 4096 nov.  24 14:48 job_foo
+
+	Change to 'job_foo' directory and list all entries:
+
+	$ cd job_foo
+	$ ls -l
+
+	drwxrwxr-x 6 andreas andreas 4096 nov.  24 14:48 20171124_144815
+	lrwxrwxrwx 1 andreas andreas   15 nov.  24 14:48 latest -> 20171124_144815
+
+	The first time a job is run, a new directory for this job is created in the output directory.
+	For each run a directory with a timestamp is created in the job output directory. There is also a symbolic link, 
+	named 'latest', pointing at the latest timestamped directory.
+	The 'info.txt' file is not relevant for this tutorial. 
+
+11. Browse job results
+	Enter the latest directory through the link and list all entries:
+	
+	$ cd latest
+	$ ls -l
+	
+	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 1_task_foo__run_with_variable_list_1
+	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 2_task_foo__run_with_named_variables_1
+	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 2_task_foo__run_with_named_variables_2
+	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 3_task_foo__run_without_variables_1
+	-rw-rw-r-- 1 andreas andreas  343 nov.  24 14:48 results.txt
+	-rw-rw-r-- 1 andreas andreas 1160 nov.  24 14:48 run.txt
+        -rw-rw-r-- 1 andreas andreas 1160 nov.  24 14:48 tasks.log
+	
+	There is a separate directory for each task added with function 'job.run_task_...(...)' in the 'job.py' file. This
+	directory is the task output folder. The path to the task output folder is accessable from task.get_output_path,
+	which can be retrieved at task initialization (see "ADVANCED FEATURES" below). Each directory name starts with the 
+	number representing the order as they are called in the job. For parallel tests, this number will be the same. 
+	Then follows the task name, and the target function that was called. The final number represents order of execution. 
+	This is only of relevance for parallel tests.
+
+	The 'results.txt' file holds the result report as was output on the screen after the job finished.
+	The 'run.txt' file is a log for the job.
+        The 'tasks.log' file is a log for all the tasks. It contains all output produced by the tasks as
+        it would otherwise be printed to the screen if the task was run directly from command line.
+
+	ENJOY!
+
+
+
+------------------------------------------------------------------
+ADVANCED FEATURES
+------------------------------------------------------------------
+1. Initializing tasks
+	Sometimes you want to initialize a task before executing it. This can be done by adding function setup_task to your task.
+	If present, setup_task will be called prior to the task function as specified in the job file.
+	The setup_task function prototype is:
+		def setup_task(task):
+	where task is an object with information on the current task
+	
+2. Add runtime plugins
+	Runtime plugins provide additional functionality during job/task execution. The following instructions explain how to 
+	setup a target job to use a plugin.
+
+	1. Add the directory '<krem_project>/library/plugins/'. The 'plugins' directory must contain a '__init__.py' file, and
+	   the plugins your want available in your project (eg. 'foo_plugin.py')
+
+	2. Create a plugin setup file '<krem_project>/config/plugin_setup.py'. This file must contain the following:
+
+		from krempack.core import plugin
+		from library.plugins import foo_plugin
+
+		def setup_plugins(plugin_handler):
+		    # Register all plugins you want to use here
+		    plugin_handler.register_plugin(foo_plugin.PluginFoo)
+
+	   where PluginFoo is the class, located in 'foo_plugin.py', that implements the plugin.
+
+	3. Import setup_plugins and execute it inside the job script. In '<krem_task>/jobs/<job>/job.py':
+
+		...
+		from config.plugin_setup import setup_plugins
+
+		...
+		setup_plugins(job.plugin_handler)
+
+    		# Initialize job
+    		job.start()
+
+------------------------------------------------------------------
+FAQ
+------------------------------------------------------------------
+
+Q: Can I have more than one job in the same project?
+A: Yes, you can create as many jobs as you want?
+
+Q: Can I add the same tasks in several jobs?
+A: Yes, the same tasks can be added to several jobs. 
+   Actually, it is recommended to write tasks in such a way that they can be reused in more that one job.
+
+Q: Can the job abort instantly if one of the tasks fail? 
+A: Yes. All tests returns the result as a returncode (directly from job.run_task_serial(...) or from job.update_on_complete
+   for parallel tests). Write the job to check the returncode from the tests to see if job execution should 
+   continue or not. 
+
+Q: What is the 'library' directory?
+A: You can place your python modules specific to the project in this directory.
+
+Q: What is the 'config' directory?
+A: This directory is reserved for future releases. 
+
+Q: Can I copy my project to other locations or even to other computers?
+A: Yes, as long as you copy the whole directory structure.
+
+Q: Can I copy my jobs and tasks to other projects?
+A: Yes, as long as you copy to the corresponding locations in the project you copy to.
+   Remember to also copy required modules, if any, in the 'library' directory.
+
+Q: What Python version are supported?
+A: As of latest KREM Python 2.6 and 2.7 is supported. Future releases will also support Python 3 and above.
+
+Q: What operating systems are supported?
+A: As of latest KREM only Linux is supported. Future releases will also support Windows 10 and above.
+
+Q: How do I uninstall KREM?
+A: Simply remove the KREM directory. There are no KREM related files placed anywhere except in the KREM directory and
+   within your KREM projects. You may also want to remove the path to the KREM directory from the environment variables
+   PATH and PYTHONPATH, and from the file ~/.bashrc, especially if you are planning to install KREM in another location
+   
+Q: How do I rename/delete a task or job?
+A: KREM recognize tasks and jobs by their directory as they appear in <krem_project>/tasks or <krem_project>/jobs. Simply
+   remove/rename the target task/job directory.
+
+
+
+------------------------------------------------------------------
+TROUBLESHOOTING:	
+------------------------------------------------------------------
+P: I keep getting the following error test for all 'krem' commands I run.
+   'ERROR: Project test root directory not found.'
+S: You must run 'krem' from within your project directory. 
+   KREM recognizes a project directory by the presence of the following directories:
+   'config  library  output  jobs  tasks'
+   
+   Make sure that all of the above directories are present in your project directory.
+   Sometimes the user deletes the 'output' directory to delete all results. Simply create the directory and try again:
+
+   $ mkdir output 
+   
+P: I have a task that calls a subprocess. The printout from this subprocess is printed to the terminal instead of the
+   task log. How can I log the printout from the subprocess to the task log?
+S: You must direct stdout and stderr to the task log for the subprocess. Stdout and stderr have already been directed to
+   the task log for the task. However, when a subprocess is called, stdout and stderr will be default set to the terminal.
+   In your task, you can use sys.stdout and sys.stderr to direct output to the task log.
+   
+   Example: 
+   import subprocess
+   import sys
+   '''
+   your code
+   '''
+   subprocess.call(args, stdout=sys.stdout, stderr=sys.stderr)
+   
+P: Job execution stops abruptly with no error messages.
+S: Check if there are any calls to exit() in the tasks executed by your job. If exit() is called during task execution,
+   you will immediately exit from the job. Simply replace any calls to exit() with return().

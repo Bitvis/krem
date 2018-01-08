@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+
+## \file krem
+## \brief KREM main executable
+'''
+# Copyright (C) 2017  Bitvis AS
+#
+# This file is part of KREM.
+#
+# KREM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# KREM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with KREM.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Bitvis AS 
+# www.bitvis.no
+# info@bitvis.no
+'''
+
+
+import sys
+import os
+import subprocess
+
+KREM_VERSION = '1.0.0'
+
+# Each command is a script located in dir 'CMD_PATH'
+# New commands must have an executable script named 'krem.<cmd_name>',
+# and add <cmd_name> to <ACCEPTABLE_CMD>
+ACCEPTABLE_CMD = ['init', 'run', 'list'] # Add new commands here
+CMD_PATH = os.path.join(os.path.dirname(__file__), 'krempack', 'core', 'commands')
+
+
+def cmd_parser(args):
+    
+    if len(args) > 1:
+        cmd = args[1]
+    else:
+        print_info()
+        exit(1)
+    
+    parsed_cmd = ['python']
+    
+    # Append command. 
+    if cmd in ACCEPTABLE_CMD:
+        cmd_script = 'krem.' + cmd
+        cmd_script_path = os.path.join(CMD_PATH,cmd_script)
+        parsed_cmd.append(cmd_script_path)
+        
+        # Append arguments
+        if len(args) > 1:
+            num_additional_args = len(args) - 2
+            additional_args = args[-num_additional_args:]
+            parsed_cmd.extend(additional_args)
+
+    elif cmd == '--help' or cmd == '-h':
+        print_usage()
+        exit(0)            
+    else:
+        print('\nInvalid command\n')
+        print_usage()
+        exit(1)
+        
+    return parsed_cmd
+    
+def print_info():
+    print('')
+    print('KREM v' + KREM_VERSION)
+    print('')
+    print_usage()
+
+def print_usage():
+    print('Usage: krem <cmd>')
+    print('Available commands:')
+    for cmd in ACCEPTABLE_CMD:
+        print('- ' + cmd)
+    print('')
+    print('for more information, execute: krem <cmd> --help')
+    print('')
+                 
+
+if __name__ == '__main__':
+    command = cmd_parser(sys.argv)
+    ret = subprocess.call(command)
+    exit(ret)
+
