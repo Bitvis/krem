@@ -21,12 +21,16 @@ class TestPluginAllEntrypoints(plugin.Plugin):
  
     def job_configuration(self, job):
         write_output_file("job_configuration", "test_line")
+    def pre_task_setup(self, task, job):
+        write_output_file("pre_task_setup", "test_line")
     def pre_task_execution(self, task):
         write_output_file("pre_task_execution", "test_line")
     def post_task_execution(self, task):
         write_output_file("post_task_execution", "test_line")
-    def post_processing(self, job):
-        write_output_file("post_processing", "test_line")
+    def task_post_processing(self, task, job):
+        write_output_file("task_post_processing", "test_line")
+    def job_post_processing(self, job):
+        write_output_file("job_post_processing", "test_line")
 
 func_call_order=[]
 class PluginCalledFirst(plugin.Plugin):
@@ -61,7 +65,7 @@ class PluginCheckCallOrder(plugin.Plugin):
 
     def __init__(self):
         None
-    def post_processing(self, job):
+    def job_post_processing(self, job):
         print("Call order: " + str(func_call_order))
         if func_call_order[0] != "first" or func_call_order[1] != "second" or func_call_order[2] != "third":
             print("ERROR: Plugin call order not as expeted.")

@@ -3,6 +3,16 @@ Bittest - Changelog
 
 -----------------------------------------
 
+v1.1.0
+----------
+Released: 2018-08-01
+
+*** New features ***
+- Added plugin entrypoints "pre_task_setup" and "task_post_processing"
+
+*** Bug fixes ***
+- Task results set before plugin entrypoint "post_task_execution"
+
 v1.0.0
 ----------
 Released: 2018-08-01

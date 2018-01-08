@@ -116,7 +116,8 @@ class TaskAction():
                     returncode = target_function(var_list)
                 else:
                     returncode = target_function()
-                    
+        
+                self.task.set_task_result(returncode)            
                 self.task.plugin_handler.entrypoints["post_task_execution"].execute({"task":self.task})
 
                 self.task.get_logger().disable(self.task)
@@ -126,7 +127,6 @@ class TaskAction():
             self.log.write(str(sys.exc_info()[0]) + ' : ' + str(e), 'error')
           
             
-        self.task.set_task_result(returncode)
         self.log.write(self.task.get_task_name() + " return code: " + str(self.task.get_task_result()), 'debug')
         
         queue.put({self.task.get_task_name():self.task})

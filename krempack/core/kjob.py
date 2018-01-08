@@ -199,6 +199,9 @@ class Job():
         self.executor.wait_until_all_complete()
         task_results = self.get_task_results(self.task_run_nr)
         
+        for task in self.task_list:
+            if task.get_run_nr() == self.task_run_nr:
+                self.plugin_handler.entrypoints["task_post_processing"].execute({"task":task, "job":self})
         self.task_run_nr = self.task_run_nr + 1
                 
         for task_result in task_results:
@@ -220,6 +223,7 @@ class Job():
             self.add_task(task, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
 
             if self.executor.is_ready():
+                self.plugin_handler.entrypoints["pre_task_setup"].execute({"task":task, "job":self})
                 self.executor.execute(self.task_list[self.task_list_index])
                 ret = self.update_on_complete()
             else:
@@ -296,4 +300,4 @@ class Job():
     
     def end(self):
         self.compile_results()
-        self.plugin_handler.entrypoints["post_processing"].execute({"job":self})
+        self.plugin_handler.entrypoints["job_post_processing"].execute({"job":self})

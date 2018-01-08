@@ -31,7 +31,7 @@ import sys
 import os
 import subprocess
 
-KREM_VERSION = '1.0.0'
+KREM_VERSION = '1.1.0'
 
 # Each command is a script located in dir 'CMD_PATH'
 # New commands must have an executable script named 'krem.<cmd_name>',

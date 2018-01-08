@@ -104,14 +104,20 @@ def test_all_entrypoints(path):
         if not os.path.isfile(os.path.join("output", "job_configuration")):
             print("Plugin failed to create file: " + "job_configuration")
             result = rc.FAIL
+        if not os.path.isfile(os.path.join("output", "pre_task_setup")):
+            print("Plugin failed to create file: " + "pre_task_setup")
+            result = rc.FAIL
         if not os.path.isfile(os.path.join("output", "pre_task_execution")):
             print("Plugin failed to create file: " + "pre_task_execution")
             result = rc.FAIL
         if not os.path.isfile(os.path.join("output", "post_task_execution")):
             print("Plugin failed to create file: " + "post_task_execution")
             result = rc.FAIL
-        if not os.path.isfile(os.path.join("output", "post_processing")):
-            print("Plugin failed to create file: " + "post_processing")
+        if not os.path.isfile(os.path.join("output", "task_post_processing")):
+            print("Plugin failed to create file: " + "task_post_processing")
+            result = rc.FAIL
+        if not os.path.isfile(os.path.join("output", "job_post_processing")):
+            print("Plugin failed to create file: " + "job_post_processing")
             result = rc.FAIL
 
     os.chdir(start_directory)
