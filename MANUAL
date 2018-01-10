@@ -24,7 +24,7 @@
 ------------------------------------------------------------------
 ABOUT THIS MANUAL
 ------------------------------------------------------------------
-This manual covers KREM v1.1.0
+This manual covers KREM v1.2.0
 
 
 
@@ -229,13 +229,14 @@ ADVANCED FEATURES
 	Runtime plugins provide additional functionality during job/task execution. The following instructions explain how to 
 	setup a target job to use a plugin.
 
-	1. Add the directory '<krem_project>/library/plugins/'. The 'plugins' directory must contain a '__init__.py' file, and
+	1. Clone the KREM_plugins repository (https://github.com/Bitvis/KREM_plugins.git) directly into '<krem_project>/library'. 
+           If you are using third party plugins, add the directory '<krem_project>/library/my_plugins/'. The 'my_plugins' directory must contain a '__init__.py' file, and
 	   the plugins your want available in your project (eg. 'foo_plugin.py')
 
-	2. Create a plugin setup file '<krem_project>/config/plugin_setup.py'. This file must contain the following:
+	2. Register the plugin in the plugin setup function located in the file '<krem_project>/library/setup.py'. This file must contain the following:
 
 		from krempack.core import plugin
-		from library.plugins import foo_plugin
+		from library.my_plugins import foo_plugin
 
 		def setup_plugins(plugin_handler):
 		    # Register all plugins you want to use here
@@ -243,10 +244,10 @@ ADVANCED FEATURES
 
 	   where PluginFoo is the class, located in 'foo_plugin.py', that implements the plugin.
 
-	3. Import setup_plugins and execute it inside the job script. In '<krem_task>/jobs/<job>/job.py':
+	3. Import setup_plugins and execute it inside the job script (the job template is already setup to do this). In '<krem_task>/jobs/<job>/job.py':
 
 		...
-		from config.plugin_setup import setup_plugins
+		from library.setup import setup_plugins
 
 		...
 		setup_plugins(job.plugin_handler)

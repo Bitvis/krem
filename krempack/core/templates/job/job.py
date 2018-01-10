@@ -4,10 +4,14 @@ import sys
 import os
 from krempack.core import kjob as krem
 from library.returncodes import *
+from library.setup import setup_plugins
 
 if __name__ == '__main__':
     path, job_name = os.path.split(os.path.dirname(__file__))
     job = krem.Job(job_name, rc)
+
+    # Setup plugins
+    setup_plugins(job.plugin_handler)
 
     # Initialize job
     job.start()

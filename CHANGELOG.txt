@@ -3,6 +3,14 @@ Bittest - Changelog
 
 -----------------------------------------
 
+v1.2.0
+----------
+Released: 2018-10-01
+
+*** New features ***
+- Added setup.py to library directory in project template with default function for plugin setup.
+- Added call to plugin setup in job template
+
 v1.1.0
 ----------
 Released: 2018-08-01
