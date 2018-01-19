@@ -24,7 +24,7 @@
 ------------------------------------------------------------------
 ABOUT THIS MANUAL
 ------------------------------------------------------------------
-This manual covers KREM v1.2.0
+This manual covers KREM v1.2.1
 
 
 
@@ -226,25 +226,49 @@ ADVANCED FEATURES
 	where task is an object with information on the current task
 	
 2. Add runtime plugins
-	Runtime plugins provide additional functionality during job/task execution. The following instructions explain how to 
-	setup a target job to use a plugin.
+	Runtime plugins provide additional functionality during job/task execution. There are several entry points (aka calls to callback functions) as listed below
+	You can choose whether to implement all or just some of the above in your plugin.
+	
+	def job_configuration(self, job):
+        # this function is executed at the beginning of a job 
+        # (at the beginning of the job.start() function)
+    
+    def pre_task_setup(self, task, job):
+        #
+    
+    def pre_task_execution(self, task):
+        # this function is executed right before the task function is called
+    
+    def post_task_execution(self, task):
+        # this function is executed right after the task function has returned
+    
+    def task_post_processing(self, task, job):
+        # this function is executed right after the task has finished and the task result is ready
+    
+    def job_post_processing(self, job):
+        # this function is executed at the end of the job 
+        # (at the end of the job.end() function)
+        
+	
 
-	1. Clone the KREM_plugins repository (https://github.com/Bitvis/KREM_plugins.git) directly into '<krem_project>/library'. 
-           If you are using third party plugins, add the directory '<krem_project>/library/my_plugins/'. The 'my_plugins' directory must contain a '__init__.py' file, and
-	   the plugins your want available in your project (eg. 'foo_plugin.py')
+
+	The following instructions explain how to setup a target job to use an existing plugin.
+
+	1. Clone the KREM_plugins repository (https://github.com/Bitvis/KREM_plugins.git) directly into '<krem_project>/library/plugins'. 
+           The plugins you will use in your project is located in <krem_project>/library/plugins/KREM_plugins/print_task_results/print_task_results.py 
 
 	2. Register the plugin in the plugin setup function located in the file '<krem_project>/library/setup.py'. This file must contain the following:
 
 		from krempack.core import plugin
-		from library.my_plugins import foo_plugin
+		from from library.plugins.KREM_plugins.print_task_results import print_task_results
 
 		def setup_plugins(plugin_handler):
 		    # Register all plugins you want to use here
-		    plugin_handler.register_plugin(foo_plugin.PluginFoo)
+		    plugin_handler.register_plugin(print_task_results.PluginPrintTaskResults)
 
-	   where PluginFoo is the class, located in 'foo_plugin.py', that implements the plugin.
+	   where PluginPrintTaskResults is the class, located in 'print_task_results.py'.
 
-	3. Import setup_plugins and execute it inside the job script (the job template is already setup to do this). In '<krem_task>/jobs/<job>/job.py':
+	3. Import setup_plugins and execute it inside the job script (the job template is already populated with the below). In '<krem_task>/jobs/<job>/job.py':
 
 		...
 		from library.setup import setup_plugins
@@ -285,7 +309,7 @@ A: Yes, as long as you copy to the corresponding locations in the project you co
    Remember to also copy required modules, if any, in the 'library' directory.
 
 Q: What Python version are supported?
-A: As of latest KREM Python 2.6 and 2.7 is supported. Future releases will also support Python 3 and above.
+A: As of latest KREM Python 2.7 is supported. Future releases will also support Python 3 and above.
 
 Q: What operating systems are supported?
 A: As of latest KREM only Linux is supported. Future releases will also support Windows 10 and above.
