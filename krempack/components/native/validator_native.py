@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file validator_native.py
 ## \brief Default implementation of validator classes
 

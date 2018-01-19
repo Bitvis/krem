@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file executor.py
 ## \brief Job execution class
 

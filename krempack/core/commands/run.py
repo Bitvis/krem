@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file run.py
 ## \brief Executes target job/task
 

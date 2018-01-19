@@ -24,7 +24,7 @@
 ------------------------------------------------------------------
 ABOUT THIS MANUAL
 ------------------------------------------------------------------
-This manual covers KREM v1.2.0
+This manual covers KREM v1.3.0
 
 
 
@@ -202,9 +202,9 @@ TUTORIAL
 	There is a separate directory for each task added with function 'job.run_task_...(...)' in the 'job.py' file. This
 	directory is the task output folder. The path to the task output folder is accessable from task.get_output_path,
 	which can be retrieved at task initialization (see "ADVANCED FEATURES" below). Each directory name starts with the 
-	number representing the order as they are called in the job. For parallel tests, this number will be the same. 
+	number representing the order as they are called in the job. For parallel tasks, this number will be the same. 
 	Then follows the task name, and the target function that was called. The final number represents order of execution. 
-	This is only of relevance for parallel tests.
+	This is only of relevance for parallel tasks.
 
 	The 'results.txt' file holds the result report as was output on the screen after the job finished.
 	The 'run.txt' file is a log for the job.
@@ -226,25 +226,50 @@ ADVANCED FEATURES
 	where task is an object with information on the current task
 	
 2. Add runtime plugins
-	Runtime plugins provide additional functionality during job/task execution. The following instructions explain how to 
-	setup a target job to use a plugin.
+	Runtime plugins provide additional functionality during job/task execution. There are several entry points (aka calls to callback functions) as listed below
+	You can choose whether to implement all or just some of the above in your plugin.
+	
+	def job_start(self, job):
+        # this function is executed at the beginning of a job 
+        # (at the beginning of the job.start() function)
+    
+    def pre_task_execution(self, task, job):
+        # this function is executed just before a task is executed
+    
+    def pre_task_function_call(self, task):
+        # this function is executed just before a task function is called
+    
+    def post_task_function_call(self, task):
+        # this function is executed right after a task function has returned
+    
+    def post_task_execution(self, task, job):
+        # In case of a serial task, this function is executed right after a task has finished and the task result is ready
+        # In case of parallel tasks, this function is executed when the update_on_complete function is called in a job 
+    
+    def job_end(self, job):
+        # this function is executed at the end of a job 
+        # (at the end of the job.end() function)
+        
+	
 
-	1. Clone the KREM_plugins repository (https://github.com/Bitvis/KREM_plugins.git) directly into '<krem_project>/library'. 
-           If you are using third party plugins, add the directory '<krem_project>/library/my_plugins/'. The 'my_plugins' directory must contain a '__init__.py' file, and
-	   the plugins your want available in your project (eg. 'foo_plugin.py')
+
+	The following instructions explain how to setup a target job to use an existing plugin.
+
+	1. Clone the krem_plugins repository (https://github.com/Bitvis/krem_plugins.git) directly into '<krem_project>/library/plugins'. 
+           The plugins you will use in your project is located in <krem_project>/library/plugins/krem_plugins/print_task_results/print_task_results.py 
 
 	2. Register the plugin in the plugin setup function located in the file '<krem_project>/library/setup.py'. This file must contain the following:
 
 		from krempack.core import plugin
-		from library.my_plugins import foo_plugin
+		from from library.plugins.krem_plugins.print_task_results import print_task_results
 
 		def setup_plugins(plugin_handler):
 		    # Register all plugins you want to use here
-		    plugin_handler.register_plugin(foo_plugin.PluginFoo)
+		    plugin_handler.register_plugin(print_task_results.PluginPrintTaskResults)
 
-	   where PluginFoo is the class, located in 'foo_plugin.py', that implements the plugin.
+	   where PluginPrintTaskResults is the class, located in 'print_task_results.py'.
 
-	3. Import setup_plugins and execute it inside the job script (the job template is already setup to do this). In '<krem_task>/jobs/<job>/job.py':
+	3. Import setup_plugins and execute it inside the job script (the job template is already populated with the below). In '<krem_task>/jobs/<job>/job.py':
 
 		...
 		from library.setup import setup_plugins
@@ -267,12 +292,12 @@ A: Yes, the same tasks can be added to several jobs.
    Actually, it is recommended to write tasks in such a way that they can be reused in more that one job.
 
 Q: Can the job abort instantly if one of the tasks fail? 
-A: Yes. All tests returns the result as a returncode (directly from job.run_task_serial(...) or from job.update_on_complete
-   for parallel tests). Write the job to check the returncode from the tests to see if job execution should 
+A: Yes. All tasks returns the result as a returncode (directly from job.run_task_serial(...) or from job.update_on_complete
+   for parallel tasks). Write the job to check the returncode from the tasks to see if job execution should 
    continue or not. 
 
 Q: What is the 'library' directory?
-A: You can place your python modules specific to the project in this directory.
+A: You can place plugins and your python modules specific to the project in this directory.
 
 Q: What is the 'config' directory?
 A: This directory is reserved for future releases. 
@@ -282,10 +307,10 @@ A: Yes, as long as you copy the whole directory structure.
 
 Q: Can I copy my jobs and tasks to other projects?
 A: Yes, as long as you copy to the corresponding locations in the project you copy to.
-   Remember to also copy required modules, if any, in the 'library' directory.
+   Remember to also copy required modules and plugins, if any, in the 'library' directory.
 
 Q: What Python version are supported?
-A: As of latest KREM Python 2.6 and 2.7 is supported. Future releases will also support Python 3 and above.
+A: As of latest KREM Python 2.7 is supported. Future releases will also support Python 3 and above.
 
 Q: What operating systems are supported?
 A: As of latest KREM only Linux is supported. Future releases will also support Windows 10 and above.
@@ -304,8 +329,8 @@ A: KREM recognize tasks and jobs by their directory as they appear in <krem_proj
 ------------------------------------------------------------------
 TROUBLESHOOTING:	
 ------------------------------------------------------------------
-P: I keep getting the following error test for all 'krem' commands I run.
-   'ERROR: Project test root directory not found.'
+P: I keep getting the following error task for all 'krem' commands I run.
+   'ERROR: Project task root directory not found.'
 S: You must run 'krem' from within your project directory. 
    KREM recognizes a project directory by the presence of the following directories:
    'config  library  output  jobs  tasks'

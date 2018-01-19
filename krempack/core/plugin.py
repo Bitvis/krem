@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file plugin.py
 ## \brief Plugin interface class and implementation of plugin handler
 '''

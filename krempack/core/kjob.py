@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file core.py
 ## \brief Implementation of the Job class
 
@@ -78,7 +78,7 @@ class Job():
         for entrypoint in c.plugin_entry_points:
             self.plugin_handler.entrypoints[entrypoint].synch_call_lists()
         
-        self.plugin_handler.entrypoints["job_configuration"].execute({"job":self})
+        self.plugin_handler.entrypoints["job_start"].execute({"job":self})
         
         initializer = self.config.get_job_initializer()
         root_output_path = initializer.execute(self.name)
@@ -201,7 +201,7 @@ class Job():
         
         for task in self.task_list:
             if task.get_run_nr() == self.task_run_nr:
-                self.plugin_handler.entrypoints["task_post_processing"].execute({"task":task, "job":self})
+                self.plugin_handler.entrypoints["post_task_execution"].execute({"task":task, "job":self})
         self.task_run_nr = self.task_run_nr + 1
                 
         for task_result in task_results:
@@ -223,7 +223,7 @@ class Job():
             self.add_task(task, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
 
             if self.executor.is_ready():
-                self.plugin_handler.entrypoints["pre_task_setup"].execute({"task":task, "job":self})
+                self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
                 self.executor.execute(self.task_list[self.task_list_index])
                 ret = self.update_on_complete()
             else:
@@ -242,6 +242,7 @@ class Job():
         
         if not error:
             self.add_task(task, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
             self.executor.execute(self.task_list[self.task_list_index])
         else:
             self.add_invalid_task(task)
@@ -300,4 +301,4 @@ class Job():
     
     def end(self):
         self.compile_results()
-        self.plugin_handler.entrypoints["job_post_processing"].execute({"job":self})
+        self.plugin_handler.entrypoints["job_end"].execute({"job":self})

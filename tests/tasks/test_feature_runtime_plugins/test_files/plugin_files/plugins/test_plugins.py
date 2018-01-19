@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 import os
 from krempack.core import plugin
@@ -19,18 +19,18 @@ class TestPluginAllEntrypoints(plugin.Plugin):
     def __init__(self):
         None
  
-    def job_configuration(self, job):
-        write_output_file("job_configuration", "test_line")
-    def pre_task_setup(self, task, job):
-        write_output_file("pre_task_setup", "test_line")
-    def pre_task_execution(self, task):
+    def job_start(self, job):
+        write_output_file("job_start", "test_line")
+    def pre_task_execution(self, task, job):
         write_output_file("pre_task_execution", "test_line")
-    def post_task_execution(self, task):
+    def pre_task_function_call(self, task):
+        write_output_file("pre_task_function_call", "test_line")
+    def post_task_function_call(self, task):
+        write_output_file("post_task_function_call", "test_line")
+    def post_task_execution(self, task, job):
         write_output_file("post_task_execution", "test_line")
-    def task_post_processing(self, task, job):
-        write_output_file("task_post_processing", "test_line")
-    def job_post_processing(self, job):
-        write_output_file("job_post_processing", "test_line")
+    def job_end(self, job):
+        write_output_file("job_end", "test_line")
 
 func_call_order=[]
 class PluginCalledFirst(plugin.Plugin):
@@ -38,7 +38,7 @@ class PluginCalledFirst(plugin.Plugin):
 
     def __init__(self):
         None
-    def job_configuration(self, job):
+    def job_start(self, job):
         print("Running first plugin")
         func_call_order.append("first")
 
@@ -47,7 +47,7 @@ class PluginCalledSecond(plugin.Plugin):
 
     def __init__(self):
         None
-    def job_configuration(self, job):
+    def job_start(self, job):
         print("Running second plugin")
         func_call_order.append("second")
 
@@ -56,7 +56,7 @@ class PluginCalledThird(plugin.Plugin):
 
     def __init__(self):
         None
-    def job_configuration(self, job):
+    def job_start(self, job):
         print("Running third plugin")
         func_call_order.append("third")
 
@@ -65,7 +65,7 @@ class PluginCheckCallOrder(plugin.Plugin):
 
     def __init__(self):
         None
-    def job_post_processing(self, job):
+    def job_end(self, job):
         print("Call order: " + str(func_call_order))
         if func_call_order[0] != "first" or func_call_order[1] != "second" or func_call_order[2] != "third":
             print("ERROR: Plugin call order not as expeted.")

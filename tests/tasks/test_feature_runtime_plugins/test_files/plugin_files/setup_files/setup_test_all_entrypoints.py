@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 from krempack.core import plugin
 from library.plugins import test_plugins

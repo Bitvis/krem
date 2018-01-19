@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file returncodes_native.py
 ## \brief Default implementation of return code classes
 

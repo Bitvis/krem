@@ -2,10 +2,29 @@ Bittest - Changelog
 ===============================
 
 -----------------------------------------
+v1.3.0
+----------
+Released: 2018-01-19
+
+- renamed plugin entry points
+	pre_task_execution -> pre_task_function_call
+	post_task_execution -> post_task_function_call
+	job_configuration -> job_start
+	job_post_processing -> job_end
+	pre_task_setup -> pre_task_execution
+	task_post_processing -> post_task_execution
+
+v1.2.1
+----------
+Released: 2018-01-19
+
+- added library/plugins
+- updated MANUAL
+
 
 v1.2.0
 ----------
-Released: 2018-10-01
+Released: 2018-01-10
 
 *** New features ***
 - Added setup.py to library directory in project template with default function for plugin setup.
@@ -13,7 +32,7 @@ Released: 2018-10-01
 
 v1.1.0
 ----------
-Released: 2018-08-01
+Released: 2018-01-08
 
 *** New features ***
 - Added plugin entrypoints "pre_task_setup" and "task_post_processing"

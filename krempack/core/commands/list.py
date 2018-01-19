@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file kremlist.py
 ## \brief Listing tasks in jon, available taks and available jobs
 

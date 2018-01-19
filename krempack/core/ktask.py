@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file task.py
 ## \brief Implementation of the Task class and TaskAction interface
 

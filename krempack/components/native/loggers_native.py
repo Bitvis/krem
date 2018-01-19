@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file loggers_native.py
 ## \brief Default implementation of logger classes
 

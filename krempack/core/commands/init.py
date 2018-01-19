@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file init.py
 ## \brief Initiates a new KREM project, task or job
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from krempack.core import plugin
 
 # Use following import if krem_plugins repo is placed in library

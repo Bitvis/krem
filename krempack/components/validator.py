@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file validator.py
 ## \brief Interface to validator classes
 

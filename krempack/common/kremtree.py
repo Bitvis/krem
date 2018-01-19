@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file kremtree.py
 ## \brief Functions for assisting project tree navigation
 

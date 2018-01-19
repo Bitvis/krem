@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file envglobal.py
 ## \brief Handles global env file 
 '''
@@ -24,7 +24,7 @@
 # www.bitvis.no
 # info@bitvis.no
 '''
-#!/usr/bin/env python
+
 
 import kremtree
 import constants as c

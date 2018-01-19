@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file initializers.py
 ## \brief Interfaces to initializer classes
 

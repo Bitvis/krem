@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file initializers_native.py
 ## \brief Default implementation of Initializer classes 
 

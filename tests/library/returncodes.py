@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file returncodes.py
 ## \brief Implementation of return codes
 

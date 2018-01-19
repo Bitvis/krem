@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file returncodes.py
 ## \brief Interface classes to the return code parser
 

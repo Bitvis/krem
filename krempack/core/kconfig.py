@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file kconfig.py
 ## \brief Declaration and implementation of configuration classes
 

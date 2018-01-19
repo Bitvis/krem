@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file loggers.py
 ## \brief Interfaces to logger classes
 

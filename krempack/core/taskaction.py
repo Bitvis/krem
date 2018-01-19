@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 ## \file ktask_native.py
 ## \brief Default implementation of TaskAction class
 
@@ -106,7 +106,7 @@ class TaskAction():
             if target_function is not None:
                 self.task.get_logger().enable(self.task)
 
-                self.task.plugin_handler.entrypoints["pre_task_execution"].execute({"task":self.task})
+                self.task.plugin_handler.entrypoints["pre_task_function_call"].execute({"task":self.task})
                 
                 if len(var_dict) > 0 and len(var_list) > 0:
                     returncode = target_function(var_list, **var_dict)
@@ -118,7 +118,7 @@ class TaskAction():
                     returncode = target_function()
         
                 self.task.set_task_result(returncode)            
-                self.task.plugin_handler.entrypoints["post_task_execution"].execute({"task":self.task})
+                self.task.plugin_handler.entrypoints["post_task_function_call"].execute({"task":self.task})
 
                 self.task.get_logger().disable(self.task)
         except Exception as e:
