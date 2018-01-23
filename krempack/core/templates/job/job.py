@@ -20,19 +20,37 @@ if __name__ == '__main__':
     job.config.job_logger.set_log_level('debug')
 
 
-    # <return_code> = job.run_task_serial(<task>, <function>, [variables])
-    err = job.run_task_serial('example_task', 'example_function_with_variable_list', variables=["variable passed from job", "as list"])
+    '''
+    adding three tasks to be executed in sequence using job.run_task_serial:
+    <return code> = job.run_task_serial(<task>, <function>, [variables])
+    '''
 
-    # Parallel tasks run only if previous task passed
-    if not err:    
-        #job.run_task_parallel(<task>, <function>, [variables])
-        job.run_task_parallel('example_task', 'example_function_with_named_variables', variables=[("var1", ""), ("var2", "run_in_parallel")])
-        job.run_task_parallel('example_task', 'example_function_with_named_variables', variables=[("var1", "also"), ("var2", "run_in_parallel")])
+    #executing function 'run_without_variables' in task 'example_task'
+    err = job.run_task_serial('task_foo', 'run_without_variables')
 
-        # <return_code> = job.update_on_complete()
-        err = job.update_on_complete() # Wait until parallel tasks are complete, and return result
+    if err == rc.PASS:
+        #executing a task function with a list of variables
+        err = job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
 
-    err = job.run_task_serial('example_task', 'example_function_without_variables')
+        if err == rc.PASS:
+            #executing task function with named variables
+            err = job.run_task_serial('task_foo', 'run_with_named_variables', variables=[("var1", "var1_value"), ("var2", "var2_value")])
+
+
+
+    '''
+    adding two tasks to be executed in parallel using:
+    job.run_task_parallel(<task>, <function>, [variables])
+    '''
+    #job.run_task_parallel(<task>, <function>, [variables])
+    job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run_in_parallel")])
+    job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run_in_parallel")])
+
+    '''
+    the below function will trigger execution of parallel tasks and it will return when all parallel tasks finish
+    '''
+    err = job.update_on_complete() # Wait until parallel tasks are complete, and return result
+
     
     # Finalize job
     job.end()

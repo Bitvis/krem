@@ -15,6 +15,13 @@ def setup_task(task):
 
 
 def run_without_variables():
+    print "executing function 'run_without_variables'"
+
+    '''
+    remove the above code if not applicably to your task
+    '''
+
+
     '''
 
     Your code here:
@@ -32,6 +39,7 @@ def run_without_variables():
 def run_with_variable_list(args):
 
     #get variables passed from job to task
+    print "executing function 'run_with_variable_list'"
     print "variables passed from job to task: " + str(args)
 
     '''
@@ -57,7 +65,8 @@ def run_with_variable_list(args):
 def run_with_named_variables(var1, var2):
 
     #get variables passed from job to task
-    print "variables passed from job to task: " + str(var1) + " " + str(var2)
+    print "executing function 'run_with_named_variables'"
+    print "named variables passed from job to task: var1: " + str(var1) + " var2: " + str(var2)
 
     '''
     remove the above code if not applicably to your task

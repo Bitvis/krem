@@ -24,7 +24,7 @@
 ------------------------------------------------------------------
 ABOUT THIS MANUAL
 ------------------------------------------------------------------
-This manual covers KREM v1.3.0
+This manual covers KREM v1.3.1
 
 
 
@@ -66,39 +66,40 @@ TUTORIAL
 ------------------------------------------------------------------
 
 1. Create your first project 'project_foo'
-	To create a project 'project_foo' run: 
+	To create a project 'project_foo' run:
 
 	$ krem init -p project_foo
 
-	A directory 'project_foo' is created with several subdirectories: 
-	'config  library  output  jobs  tasks' 
+	A directory 'project_foo' is created with several subdirectories:
+	'config  library  output  jobs  tasks'
 	Each directory will be explained later in this tutorial.
 
 
 2. Enter 'project_foo'
-	
+
 	$ cd project_foo
 
 
 3. Create your first job 'job_foo'
 	A job is a list of tasks run in series, in parallel or a combination of both.
 	The order is specified by the user.
-	Each job has its own directory which is located in the 'jobs' directory. 
+	Each job has its own directory which is located in the 'jobs' directory.
 	When a job is created, a template file 'job.py' is placed in the job directory.
 	To create a job 'job_foo' run:
 
 	$ krem init -j job_foo
-	
+
 	This will create a job directory 'jobs/job_foo' and place a 'job.py' file in the directory.
 
 
 4. Quick look at the 'job.py' file
 	Open the 'jobs/job_foo/job.py file and take a quick look.
+	This template file can be run for demonstration without modification.
 	The content of the file is explained later in this tutorial.
 
 
 5. Create your first task 'task_foo'
-	Each task has its own directory which is located in the 'tasks' directory. 
+	Each task has its own directory which is located in the 'tasks' directory.
 	When a task is created, a template file 'run.py' is placed in the task directory.
 	To create a 'task_foo' task run:
 
@@ -106,49 +107,24 @@ TUTORIAL
 
 	This will create a task directory 'tasks/task_foo/' and place the files 'run.py', '__init__.py', and 'setup.txt' in the directory.
 	Note the keyword 'TASK_FILE' in 'setup.txt'. This points to the python script to be executed within the task. In this task, it is the
-	file 'run.py'. 
+	file 'run.py'.
 
 
 6. Quick look at the 'run.py' file
 	Open the 'tasks/task_foo/run.py' file and take a look.
 	This template file can be run for demonstration without modification.
 	Study the file for few seconds.
-	Note the return error codes. A task can return at any point with a appropriate error code.
+	Note the return error codes. A task can return at any point with an appropriate error code.
 
 
-7. Write your first job
-	Now go back to the file 'job.py' in directory 'job_foo'.
-	
-	In most situations you will work only with the functions job.run_task_serial(...) and job.run_task_parallel(...). 	
-	# job.run_task_serial(<task>, <function>, [variables])
+7. Running the template job
+    Once you have created a job and a task from the template, as described above, you are ready to execute it.
+    To execute the job 'job_foo' run:
 
-	To add a task to the job, simply change the text 'example_task' to the name of the target task, and
-	change the text 'example_function_with_variables' or 'example_function' with the function in your task script you
-	want to run.
+    $ krem run -j job_foo
 
-	Add the 'task_foo' to the job four times. Ensure they are placed between the function calls job.start() and job.end()
-	
-	job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
-	job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run in parallel")])
-	job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run in parallel")])
-	job.update_on_complete()
-	job.run_task_serial('task_foo', 'run_without_variables')
-	
-	The first line specifies that the task 'task_foo' will be run as the first task.
-	It also specifies an optional list of variables. In this task there are two variables, but any number or none variables are allowed.
-	After the first tasks has finished, tasks on line 2 and 3 will be run in parallel. These tasks execute the function 
-	'run_with_named_variables', which expect two variables with the name 'var1' and 'var2'. job.update_on_complete() on line 4 waits until the 
-	parallel tasks have finished, and performs the required post processing. This function will also return 'True' only if all the 
-	parallel tasks passed. The task on line 5 will execute when the previous parallel tasks are complete.
+   	Optionally, you can first call:
 
-	
-8. Run your first job 
-	To run 'job_foo' run:
-
-	$ krem run -j job_foo 
-
-	Optionally, you can first call:
-	
 	$ krem list -j
 
 	All available jobs are listed with a number ID (if 'job_foo' is the only available job, it will have the number ID '0').
@@ -156,11 +132,39 @@ TUTORIAL
 
 	$ krem run -j 0
 
-	The job is run and when it finish, a report is output. Hopefully your task passed :-)
+	The job is run and when it finish, a report is output. Hopefully your tasks passed :-)
+
+
+8. Job template explained
+	Now go back to the file 'job.py' in directory 'job_foo'.
+	The below line specifies that function 'run_without_variables' in task 'task_foo' will be run first.
+
+	    job.run_task_serial('task_foo', 'run_without_variables')
+
+	If the above task passes, the below task will be executed. In this case a list is passed to the task function.
+
+	    job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
+
+	It is also possible to pass named variables to a task function as shown below
+
+	    job.run_task_serial('task_foo', 'run_with_named_variables', variables=[("var1", "var1_value"), ("var2", "var2_value")])
+
+
+	The template job file also includes parallel task execution.
+	First, you have to add tasks for parallel execution as shown below.
+    Then, call 'job.update_on_complete()' to trigger parallel execution. 'job.update_on_complete()' will return once all of the above tasks
+    finish and return.
+
+        job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run_in_parallel")])
+        job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run_in_parallel")])
+
+        job.update_on_complete() # Wait until parallel tasks are complete, and return result
+
+
 
 9. Job return code
-	The return codes from the job are explained in the 'job.py' file
-	
+	The return codes from the job are explained in the 'job.py' file. Look for 'job.get_job_result()'
+
 
 10. Find your task results
 	Each time a job is run, the result and logs are written to a new directory in the 'output' directory.
@@ -181,26 +185,27 @@ TUTORIAL
 	lrwxrwxrwx 1 andreas andreas   15 nov.  24 14:48 latest -> 20171124_144815
 
 	The first time a job is run, a new directory for this job is created in the output directory.
-	For each run a directory with a timestamp is created in the job output directory. There is also a symbolic link, 
+	For each run a directory with a timestamp is created in the job output directory. There is also a symbolic link,
 	named 'latest', pointing at the latest timestamped directory.
-	The 'info.txt' file is not relevant for this tutorial. 
+	The 'info.txt' file is not relevant for this tutorial.
 
 11. Browse job results
 	Enter the latest directory through the link and list all entries:
-	
+
 	$ cd latest
 	$ ls -l
-	
-	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 1_task_foo__run_with_variable_list_1
-	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 2_task_foo__run_with_named_variables_1
-	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 2_task_foo__run_with_named_variables_2
-	drwxrwxr-x 2 andreas andreas 4096 nov.  24 14:48 3_task_foo__run_without_variables_1
-	-rw-rw-r-- 1 andreas andreas  343 nov.  24 14:48 results.txt
-	-rw-rw-r-- 1 andreas andreas 1160 nov.  24 14:48 run.txt
-        -rw-rw-r-- 1 andreas andreas 1160 nov.  24 14:48 tasks.log
-	
+
+    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 1_task_foo__run_without_variables_1
+    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 2_task_foo__run_with_variable_list_1
+    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 3_task_foo__run_with_named_variables_1
+    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 4_task_foo__run_with_named_variables_1
+    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 4_task_foo__run_with_named_variables_2
+    -rw-rw-r--. 1 michalk michalk  382 Jan 23 18:53 results.txt
+    -rw-rw-r--. 1 michalk michalk 1799 Jan 23 18:53 run.txt
+    -rw-rw-r--. 1 michalk michalk 1204 Jan 23 18:53 tasks.log
+
 	There is a separate directory for each task added with function 'job.run_task_...(...)' in the 'job.py' file. This
-	directory is the task output folder. The path to the task output folder is accessable from task.get_output_path,
+	directory is the task output folder. The path to the task output folder is accessible from task.get_output_path,
 	which can be retrieved at task initialization (see "ADVANCED FEATURES" below). Each directory name starts with the 
 	number representing the order as they are called in the job. For parallel tasks, this number will be the same. 
 	Then follows the task name, and the target function that was called. The final number represents order of execution. 
