@@ -13,10 +13,9 @@ if __name__ == '__main__':
     
     err = job.run_task_serial('simple_task', 'run')
 
-    job.run_task_parallel('simple_task', 'run')
-    job.run_task_parallel('simple_task', 'run')
-    job.run_task_parallel('simple_task', 'run')
-    job.update_on_complete()
+    for i in range (0,10):
+        job.run_task_parallel('simple_task', 'run')
+        job.update_on_complete()
     job.end()
     
     ret = job.get_job_result()

@@ -70,17 +70,26 @@ EXPECTED_OUTPUT_FILE_TASK_LOG = os.path.join(EXPECTED_OUTPUT_JOB_INSTANCE_DIR, "
 EXPECTED_CONTENT_RUN_LOG = ["[INFO]: Execute task:",
                             "[INFO]: Results written to:"]
 EXPECTED_CONTENT_TASK_LOG = ["This is just a simple task"]
-EXPECTED_CONTENT_RESULTS = ["TASK                                     RESULT", 
+
+EXPECTED_CONTENT_RESULTS = ["TASK                                     RESULT",
                             "1_simple_task__run_1                     PASS",
                             "2_simple_task__run_1                     PASS",
-                            "2_simple_task__run_2                     PASS",
-                            "2_simple_task__run_3                     PASS",
- 
-                            "SUMMARY:", 
+                            "3_simple_task__run_1                     PASS",
+                            "4_simple_task__run_1                     PASS",
+                            "5_simple_task__run_1                     PASS",
+                            "6_simple_task__run_1                     PASS",
+                            "7_simple_task__run_1                     PASS",
+                            "8_simple_task__run_1                     PASS",
+                            "9_simple_task__run_1                     PASS",
+                            "10_simple_task__run_1                    PASS",
+                            "11_simple_task__run_1                    PASS",
+
+                            "SUMMARY:",
+
+                            "PASS                 11",
+                            "FAIL                 0",
                             "SKIP                 0",
-                            "UNSTABLE             0",
-                            "PASS                 4",
-                            "FAIL                 0"]
+                            "UNSTABLE             0",]
 
 
 

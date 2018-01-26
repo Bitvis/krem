@@ -62,18 +62,36 @@ class Executor():
         p.start()        
 
     def wait_until_all_complete(self):
+        '''
+        the pipeThe queue implementation in multiprocessing that allows data to be transferred between processes relies on standard OS pipes.
+        OS pipes are not infinitely long, so the process which queues data could be blocked in the OS during the put() operation until some other process uses get() to retrieve data from the queue.
+        For small amounts of data, the main process can join() all the spawned subprocesses and then pick up the data. This often works well, but does not scale, and it is not clear when it will break.
+        But it will certainly break with large amounts of data. The subprocess will be blocked in put() waiting for the main process to remove some data from the queue with get(), but the main process is blocked in join() waiting for the subprocess to finish. This results in a deadlock.
+        '''
+
+        still_running = len(self.procsRunning)
+
+        #we empty the queue before we join all subprocesses to avoid deadlock
+        while still_running > 0:
+            if not self.queue.empty():
+                entry = self.queue.get()
+                task_name, task = entry.popitem()
+
+                try:
+                    self.tasksRunning[task_name].set_task_result(task.get_task_result())
+                except Exception as e:
+                    self.log.write("Failed to retrieve task results", 'error')
+                still_running = still_running - 1
+
         for proc in self.procsRunning:
-            proc.join()
-            
-        while not self.queue.empty():
-            entry = self.queue.get()
-            task_name, task = entry.popitem()
-        
-            try:
-                self.tasksRunning[task_name].set_task_result(task.get_task_result())
-            except Exception as e:
-                self.log.write("Failed to retreive task results", 'error')
-        
+            if not proc.is_alive():
+                #call join() with timeout and catch exception if we hang here again
+                proc.join()
+
+
+
+
+
         self.tasksRunning = {}
         self.procsRunning = []
             
