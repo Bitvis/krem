@@ -133,9 +133,9 @@ class Job():
         
     # Creates new object 'Task'. The object parameters are initialized in this function,
     # however the output directory is not created until required (performed by TaskInitializer)
-    def add_task(self, task, function, variables=None, task_logger=None, task_initializer=None):
+    def add_task(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
         
-        new_task = ktask.Task(task, self.task_run_nr)
+        new_task = ktask.Task(task_name, self.task_run_nr)
         new_task.set_plugin_handler(self.plugin_handler)
         new_task.set_environ(self.config.get_environ())
         new_task.config.set_root_output_path(self.config.get_root_output_path())
@@ -214,38 +214,40 @@ class Job():
         return ret      
     
     # Run single task and wait until complete
-    def run_task_serial(self, task, function, variables=None, task_logger=None, task_initializer=None):
+    def run_task_serial(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
         ret = 1
         
-        ret = self.validator.validate(task)
+        ret = self.validator.validate(task_name)
         
         if not ret:
-            self.add_task(task, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            self.add_task(task_name, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            task = self.task_list[self.task_list_index]
 
             if self.executor.is_ready():
                 self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
-                self.executor.execute(self.task_list[self.task_list_index])
+                self.executor.execute(task)
                 ret = self.update_on_complete()
             else:
-                self.log.write('Unable to execute task: ' + self.task_list[self.task_list_index].task_name, 'error')
+                self.log.write('Unable to execute task: ' + task.task_name, 'error')
                 self.log.write('Parallel tasks executed, but not completed', 'error')
                 self.log.write('Aborting job...', 'error')
                 exit(1)
         else:
-            self.add_invalid_task(task)
+            self.add_invalid_task(task_name)
         return ret     
         
     # Run single task and continue immediately. Call multiple times to run tasks in parallel. Must call update_on_complete()
     # in job before running new run_task_serial or end of job
-    def run_task_parallel(self, task, function, variables=None, task_logger=None, task_initializer=None):
-        error = self.validator.validate(task)
+    def run_task_parallel(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
+        error = self.validator.validate(task_name)
         
         if not error:
-            self.add_task(task, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            self.add_task(task_name, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            task = self.task_list[self.task_list_index]
             self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
-            self.executor.execute(self.task_list[self.task_list_index])
+            self.executor.execute(task)
         else:
-            self.add_invalid_task(task)
+            self.add_invalid_task(task_name)
 
     
     # Parse and log results. The results are collected from each Task in the result logger

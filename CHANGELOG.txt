@@ -1,5 +1,11 @@
-Bittest - Changelog
+KREM - Changelog
 ===============================
+
+-----------------------------------------
+v1.3.3
+----------
+Released: 2018-01-31
+- bugfix: task object and not task name is now passed to pre_task_execution plugin entry-point
 
 -----------------------------------------
 v1.3.2

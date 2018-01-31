@@ -20,17 +20,56 @@ class TestPluginAllEntrypoints(plugin.Plugin):
         None
  
     def job_start(self, job):
-        write_output_file("job_start", "test_line")
+        try:
+            # the first line is to check that we get the job object and not just task name
+            job.name
+            write_output_file("job_start", "test_line")
+        except Exception as e:
+            pass
+
     def pre_task_execution(self, task, job):
-        write_output_file("pre_task_execution", "test_line")
+        try:
+            #the first two linea are to check that we get the task and job objects and not just task and job names
+            task.get_task_name()
+            job.name
+            write_output_file("pre_task_execution", "test_line")
+        except Exception as e:
+            pass
+
+
     def pre_task_function_call(self, task):
-        write_output_file("pre_task_function_call", "test_line")
+        try:
+            #the first line is to check that we get the task object and not just task name
+            task.get_task_name()
+            write_output_file("pre_task_function_call", "test_line")
+        except Exception as e:
+            pass
+
+
     def post_task_function_call(self, task):
-        write_output_file("post_task_function_call", "test_line")
+        try:
+            #the first line is to check that we get the task object and not just task name
+            task.get_task_name()
+            write_output_file("post_task_function_call", "test_line")
+        except Exception as e:
+            pass
+
     def post_task_execution(self, task, job):
-        write_output_file("post_task_execution", "test_line")
+         try:
+             # the first two linea are to check that we get the task and job objects and not just task and job names
+             task.get_task_name()
+             job.name
+             write_output_file("post_task_execution", "test_line")
+         except Exception as e:
+             pass
+
     def job_end(self, job):
-        write_output_file("job_end", "test_line")
+        try:
+            # the first line is to check that we get the job object and not just task name
+            job.name
+            write_output_file("job_end", "test_line")
+        except Exception as e:
+            pass
 
 func_call_order=[]
 class PluginCalledFirst(plugin.Plugin):
