@@ -106,9 +106,6 @@ def deploy_template_project(targetDirectory):
             print("Deploying initial file-structure to " + targetDirectory)
             copy_files(templatePath, targetDirectory)
 
-            env_main_file_path = os.path.join(targetDirectory, c.PROJECT_CONFIG_DIR, c.ENV_FILE_NAME)
-            generate_file(env_main_file_path, lambda : generate_env_main(targetDirectory))            
-            
             
 #################################################
 #   Deploys template task

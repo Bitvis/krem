@@ -1,0 +1,24 @@
+from krempack.core import plugin
+
+'''
+Use following import if krem_plugins repo is placed in library,
+or add other plugins in the same way
+'''
+#from library.plugins.krem_plugins.print_task_results.print_task_results import PluginPrintTaskResults
+
+'''
+to get krem_plugins: 
+cd <krem project>/library/plugins
+git clone https://github.com/Bitvis/krem_plugins.git
+'''
+
+def setup_plugins(plugin_handler):
+    # Register plugins here
+    '''
+    Uncomment the following to enable some of the plugins from krem_plugins,
+    or add other plugins in the same way
+    '''
+    #plugin_handler.register_plugin(PluginPrintTaskResults)
+
+    pass
+

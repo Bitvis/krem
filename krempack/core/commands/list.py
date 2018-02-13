@@ -64,10 +64,10 @@ def list_tasks():
             # List scripts in task, to quickly see if something is missing
             task_path = os.path.join(tasks_path, task)
 
-            if not os.path.isfile(os.path.join(task_path, c.TEMPLATE_TASK_SETUP_FILE)):
-                missingFiles.append(c.TEMPLATE_TASK_SETUP_FILE)
-            if not os.path.isfile(os.path.join(task_path, c.TEMPLATE_INIT_PACKAGE_FILE)):
-                missingFiles.append(c.TEMPLATE_INIT_PACKAGE_FILE)
+            if not os.path.isfile(os.path.join(task_path, c.TEMPLATE_TASK_FILE)):
+                missingFiles.append(c.TEMPLATE_TASK_FILE)
+            if not os.path.isfile(os.path.join(task_path, c.INIT_PACKAGE_FILE)):
+                missingFiles.append(c.INIT_PACKAGE_FILE)
                     
             if len(missingFiles) > 0:
                 printstring = printstring + '\t' + "missing files: " + str(missingFiles)

@@ -37,37 +37,44 @@ class TaskData():
     
     def __init__(self):
         self.task_name = None
+        self.run_name = None
         self.run_nr = None
-        self.path = None
+        self.full_run_nr = None
         self.job_output_path = None
         self.output_path = None
     
     def set_task_name(self, task_name):
         self.task_name = task_name
-        
+
+    def set_run_name(self, run_name):
+        self.run_name = run_name
+
     def set_run_nr(self, run_nr):
         self.run_nr = run_nr
     
+    def set_full_run_nr(self, full_run_nr):
+        self.full_run_nr = full_run_nr
+
     def set_job_path(self, root_output_path):
         self.job_output_path = root_output_path
-        
-    def set_path(self, path):
-        self.path = path
         
     def set_output_path(self, path):
         self.output_path = path
         
     def get_task_name(self):
         return self.task_name
-    
+
+    def get_run_name(self):
+        return self.run_name
+
     def get_run_nr(self):
         return self.run_nr
-    
+
+    def get_full_run_nr(self):
+        return self.full_run_nr
+
     def get_job_path(self):
         return self.job_output_path
-    
-    def get_path(self):
-        return self.path
     
     def get_output_path(self):
         return self.output_path
@@ -76,17 +83,14 @@ class Task(TaskData):
 
     def __init__(self, task, run_nr):
         self.target = task
-        self.task_name = None
         self.target_module_name = None
         self.target_module_path = None
         self.target_function = None
         self.run_nr = run_nr
         self.action = None
         self.variables = []
-        self.path = None
         self.task_result = None
         self.initializer = None
-        self.environ = None
         self.plugin_handler = None
         self.job_output_path = None
         self.output_path = None
@@ -121,9 +125,6 @@ class Task(TaskData):
     def set_task_result(self, task_result):
         self.task_result = task_result
         
-    def set_environ(self, environ):
-        self.environ = environ
-        
     def set_plugin_handler(self, plugin_handler):
         self.plugin_handler = plugin_handler
         
@@ -154,19 +155,12 @@ class Task(TaskData):
     def get_task_result(self):
         return self.task_result
     
-    def get_environ(self):
-        return self.environ
-    
     def get_plugin_handler(self):
         return self.plugin_handler
     
     def get_logger(self):
         return self.logger
-    
-    @abc.abstractmethod
-    def setup_task(self, task):
-        None
-   
+
 ###############################################
 #   Class containing how the task should be 
 #       executed and verified

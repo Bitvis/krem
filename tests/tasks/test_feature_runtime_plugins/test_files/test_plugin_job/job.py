@@ -1,14 +1,12 @@
 
 
-import sys
-import os
-from krempack.core import kjob as krem
+
+from krempack.core import kjob
 from library.returncodes import *
 from config.setup_files import setup
 
 if __name__ == '__main__':
-    path, job_name = os.path.split(os.path.dirname(__file__))
-    job = krem.Job(job_name, rc)
+    job = kjob.Job(__file__, rc)
 
     setup.setup_plugins(job.plugin_handler)
 
@@ -25,10 +23,5 @@ if __name__ == '__main__':
     # Finalize job
     job.end()
     
-    #if only a single task returned error code !=0, then return that error code,
-    #else if more than one task returned !=0, but the codes are the same for all, then return that code
-    #else if more than one task returned !=0, and the codes differ then return 1
-    ret = job.get_job_result()
-    
-    exit(ret)
-    
+
+    exit(err)

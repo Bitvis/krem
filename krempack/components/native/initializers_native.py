@@ -61,7 +61,6 @@ class JobInitializerNative(initializers.JobInitializer):
         if not os.path.isdir(job_output_path):
             try:
                 os.mkdir(job_output_path)
-                print("\n\nJob output initialized in directory " + job_output_path + '\n')
             except Exception as e:
                 print("[INTERNAL_ERROR]: Unable to create " + job_output_path)
                 exit(1)            
@@ -69,7 +68,7 @@ class JobInitializerNative(initializers.JobInitializer):
         # Create instance output directory
         try:
             os.mkdir(instance_output_path)
-            print("\n\nJob instance output initialized in directory " + instance_output_path + '\n')
+
         except Exception as e:
             print("[INTERNAL_ERROR]: Unable to create " + instance_output_path)
             exit(1)
@@ -150,24 +149,22 @@ class TaskInitializerNative(initializers.TaskInitializer):
     
     def execute(self, target):
         
-        target.set_output_path(os.path.abspath(os.path.join(target.config.get_root_output_path(), target.get_task_name())))
+        target.set_output_path(os.path.abspath(os.path.join(target.config.get_root_output_path(), target.get_run_name())))
         
         
         # Create output directory for this task
         try:
             os.mkdir(target.get_output_path())
-            self.log.write("Task initialized: " + target.get_output_path(), 'debug')
+            self.log.write("Created output directory: " + target.get_output_path(), 'debug')
         except:
             self.log.write("Unable to create output directory for task: " + target.get_output_path(), 'error')
 
     # Task name = <run_nr>_<task_name>__<action>_<parallel_nr?>
-    def generate_task_name(self, new_task, task_list=[]):
+    def generate_run_name(self, new_task, task_list=[]):
         module_name = new_task.get_target_module_name()
         
         if module_name is not None:
             module_name = module_name.split('.')[1]
-
-            task_name = str(new_task.get_run_nr()) + '_' + new_task.get_target() + '__' + str(new_task.get_target_function())
 
             # Append postfix number. Used for identifying append order for parallel tasks
             num_task = 0
@@ -175,56 +172,31 @@ class TaskInitializerNative(initializers.TaskInitializer):
                 if task.run_nr is new_task.run_nr:
                     num_task = num_task + 1
 
-            task_name = task_name + '_' + str(num_task)
+            task_name = str(new_task.get_run_nr()) + '_' + str(num_task) + '_' + new_task.get_target() +'_'+ str(new_task.get_target_function()) +''
 
-
-            new_task.set_task_name(task_name)
+            new_task.set_full_run_nr(str(new_task.get_run_nr()) + '_' + str(num_task))
+            new_task.set_run_name(task_name)
         
     def compile_task_module_name_and_path(self, task):
-        setup_file_path = os.path.join(kremtree.find_common_dir(c.PROJECT_TASKS_DIR), task.get_target(), c.TEMPLATE_TASK_SETUP_FILE)
-        param = None
-        param_split = None
-        path = None
+        task_path = None
         module_name = None
-        
-        # Search for path in setup file
-        f = open(setup_file_path)
-        for line in f.readlines():
-            param = re.findall(c.TEMPLATE_TASK_SETUP_PARAM_NAME_SCRIPT_PATH, line)
-            
-            if len(param) > 0:
-                param_split = line.rsplit('=')
-                if len(param_split) >= 2:
-                    path = param_split[1].strip()
-                    path = path.rstrip('\n\r')
-                    
-                    module_name = os.path.basename(path)
-                    module_name = module_name.strip('.py')
-                    module_name = task.get_target() + '.' + module_name
-                    break
-                    
-        # Check if path exists
-        if path is not None:
-            if path[:2] is './':
-                path.rstrip('./')
-                path = os.path.join(kremtree.find_common_dir(c.PROJECT_TASKS_DIR), task.get_target(), path)
-            elif path[:1] is '/':
-                pass
-            else:
-                slashes = re.findall('//', path)
-                if not len(slashes) > 0:
-                    path = os.path.join(kremtree.find_common_dir(c.PROJECT_TASKS_DIR), task.get_target(), path)
-            
-            if not os.path.isfile(path):
-                path = None
-        else:
-            self.log.write("Path to task not found in setup file", 'error')
-                    
-        if path is not None and module_name is not None:
-            task.set_target_module_name(module_name)
-            task.set_target_module_path(path)
-        else:
-            self.log.write("Path to module in task: " + str(task.get_target()) + " not found in setup file", 'error')
-            self.log.write("Ensure setup.txt exists in task folder, and correct name/path is given", 'error')
+
+        task_path = os.path.join(kremtree.find_common_dir(c.PROJECT_TASKS_DIR), task.get_target(), c.TEMPLATE_TASK_FILE)
+
+        if not os.path.isfile(task_path):
+            self.log.write("Path to module in task: " + str(task.get_target()) + " not found in task.cfg file", 'error')
+            self.log.write("Ensure task.cfg exists in task folder, and correct name/path is given", 'error')
             exit(1)
-            
+
+        module_name = c.TEMPLATE_TASK_FILE
+        module_name = module_name.strip('.py')
+        module_name = task.get_target() + '.' + module_name
+
+        task.set_target_module_name(module_name)
+        task.set_target_module_path(task_path)
+
+
+
+
+
+

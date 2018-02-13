@@ -3,20 +3,19 @@
 import sys
 import os
 import time
-from krempack.core import kjob as krem
+from krempack.core import kjob
 from library.returncodes import *
 
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", ".."))
 from library.testlib import parameters as p
 
 if __name__ == '__main__':
-    path, job_name = os.path.split(os.path.dirname(__file__))
-    job = krem.Job(job_name, rc)
+    job = kjob.Job(__file__, rc)
 
     # Initialize job
     job.start()
     
-    job.config.job_logger.set_log_level('debug')
+    job.config.job_logger.set_log_level('info')
 
 
     job.run_task_serial('test_command_list_jobs', 'run')
@@ -33,6 +32,9 @@ if __name__ == '__main__':
                 job.run_task_serial('test_output_run_log', 'run', variables=[temp_project_path])
                 job.run_task_serial('test_output_task_log', 'run', variables=[temp_project_path])
                 job.run_task_serial('test_output_results_log', 'run', variables=[temp_project_path])
+
+                job.run_task_serial('test_syntax_error_in_task', 'run_with_syntax_error', variables=[temp_project_path])
+
                 if not job.run_task_serial('test_feature_runtime_plugins', 'mv_files_to_krem_temp_project', variables=[temp_project_path]):
                     time.sleep(1) # Fail to create output dir for task if same timestamp
                     job.run_task_serial('test_feature_runtime_plugins', 'test_all_entrypoints', variables=[temp_project_path])
@@ -43,12 +45,17 @@ if __name__ == '__main__':
 
     job.run_task_serial('test_command_init_job', 'run')
     job.run_task_serial('test_command_init_task', 'run')
-    job.run_task_serial('test_setup_task', 'run')
+    job.run_task_serial('test_task_object_in_task', 'run')
     
     # Finalize job
     job.end()
+
+    task_results = job.get_task_results()
+    #we expect each result to be '0' so if the sum of all results is more than 0 then at least one of the tasks failed
+    if sum(task_results) > 0:
+        err = rc.FAIL
+    else:
+        err = rc.PASS
     
-    ret = job.get_job_result()
-    
-    exit(ret)
+    exit(err)
     

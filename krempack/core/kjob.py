@@ -51,12 +51,15 @@ class Job():
     plugin_handler = plugin.PluginHandler()
 
     # Job initiated with all default components
-    def __init__(self, name, returncodes, func=None):  
+    def __init__(self, name, returncodes, func=None):
+
+        #get job name from full path to the job file
+        path, self.name = os.path.split(os.path.dirname(name))
+
         self.task_list = []
         self.task_run_nr = 1
         self.task_list_index = -1
-        self.name = name
-        
+
         self.config = kconfig.JobConfig() 
         
         self.config.set_job_initializer(initializers_native.JobInitializerNative())
@@ -64,8 +67,6 @@ class Job():
         self.config.set_task_initializer_default(initializers_native.TaskInitializerNative) #Do not create instance here, as each task requires it's own instance
         
         self.config.set_return_code_parser(returncodes_native.ReturnCodeParserNative(returncodes))
-        
-        self.config.set_environ(os.environ.copy())
         
         self.config.set_job_logger(loggers_native.JobLoggerNative())
         
@@ -77,8 +78,7 @@ class Job():
     def start(self): 
         for entrypoint in c.plugin_entry_points:
             self.plugin_handler.entrypoints[entrypoint].synch_call_lists()
-        
-        self.plugin_handler.entrypoints["job_start"].execute({"job":self})
+
         
         initializer = self.config.get_job_initializer()
         root_output_path = initializer.execute(self.name)
@@ -99,6 +99,8 @@ class Job():
         self.executor.set_logger(self.config.get_job_logger())
         
         self.log = self.config.get_job_logger()
+
+        self.plugin_handler.entrypoints["job_start"].execute({"job": self})
        
     # Load configuration object
     # Must not just set the new config object, as user has most likely not 
@@ -121,9 +123,7 @@ class Job():
                 self.config.set_return_code_parser(conf.return_code_parser)
             if conf.task_initializer_default is not None:
                 self.config.set_task_initializer_default(conf.task_initializer_default)
-            if conf.task_initializer_default is not None:
-                self.config.set_environ(conf.get_environ)       
-                
+
                 
             self.log.write("Loaded new configurations", "info")
         else:
@@ -137,11 +137,11 @@ class Job():
         
         new_task = ktask.Task(task_name, self.task_run_nr)
         new_task.set_plugin_handler(self.plugin_handler)
-        new_task.set_environ(self.config.get_environ())
         new_task.config.set_root_output_path(self.config.get_root_output_path())
         new_task.set_action(self.taskaction())
         new_task.get_action().set_target_task(new_task)
-        
+        new_task.set_job_path(self.config.get_root_output_path())
+
         # Set target function to call in target task
         new_task.set_target_function(function)   
         
@@ -170,8 +170,8 @@ class Job():
         self.task_list.append(new_task)
         
         new_task.initializer.compile_task_module_name_and_path(new_task)
-        new_task.initializer.generate_task_name(new_task, self.task_list) # Must be called here, as task name is used before task initializer is executed
-        
+        new_task.initializer.generate_run_name(new_task, self.task_list) # Must be called here, as task name is used before task initializer is executed
+        new_task.set_task_name(task_name)
         
         
         self.task_list_index = self.task_list_index + 1
@@ -180,7 +180,7 @@ class Job():
         
         new_task = ktask.Task(task, self.task_run_nr)
         new_task.set_task_result(1)
-        new_task.set_task_name("task: " + str(task))
+        new_task.set_run_name("task: " + str(task))
             
         self.task_list.append(new_task)
         
@@ -190,12 +190,8 @@ class Job():
     #   Executors
     ############################
     
-    # Wait until task(s) are complete. returns task result accordingly:
-        #if only a single task returned code !=0, then return that code,
-        #else if more than one task returned !=0, but the return code is the same for all, then return that code
-        #else if more than one task returned !=0, and codes differ then return 1
-    def update_on_complete(self):
-        ret = 0
+    # Wait until task(s) are complete. returns task results:
+    def wait_for_complete(self):
         self.executor.wait_until_all_complete()
         task_results = self.get_task_results(self.task_run_nr)
         
@@ -203,15 +199,8 @@ class Job():
             if task.get_run_nr() == self.task_run_nr:
                 self.plugin_handler.entrypoints["post_task_execution"].execute({"task":task, "job":self})
         self.task_run_nr = self.task_run_nr + 1
-                
-        for task_result in task_results:
-            if task_result != 0: 
-                if ret == 0:
-                    ret = task_result                
-                elif ret != task_result:
-                    ret = 1
-                    break            
-        return ret      
+
+        return task_results
     
     # Run single task and wait until complete
     def run_task_serial(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
@@ -226,9 +215,10 @@ class Job():
             if self.executor.is_ready():
                 self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
                 self.executor.execute(task)
-                ret = self.update_on_complete()
+                task_results = self.wait_for_complete()
+                ret = task_results[0]
             else:
-                self.log.write('Unable to execute task: ' + task.task_name, 'error')
+                self.log.write('Unable to execute task: ' + task.run_name, 'error')
                 self.log.write('Parallel tasks executed, but not completed', 'error')
                 self.log.write('Aborting job...', 'error')
                 exit(1)
@@ -236,7 +226,7 @@ class Job():
             self.add_invalid_task(task_name)
         return ret     
         
-    # Run single task and continue immediately. Call multiple times to run tasks in parallel. Must call update_on_complete()
+    # Run single task and continue immediately. Call multiple times to run tasks in parallel. Must call wait_for_complete()
     # in job before running new run_task_serial or end of job
     def run_task_parallel(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
         error = self.validator.validate(task_name)
@@ -260,16 +250,16 @@ class Job():
             result_logger.set_code_parser(self.config.get_return_code_parser())
 
             # Write to log
-            result_logger.write(self.task_list)
+            results, results_colored = result_logger.format_results(self.task_list)
 
             # Print log to screen
             print('\n')
             print('---------------------------------------------------------')
-            with open(result_logger.get_log_file(), 'r') as f:
-                print(f.read())
-
+            print(results_colored)
             print('---------------------------------------------------------')
             print('\n')
+
+            result_logger.write_to_log(results)
 
             self.log.write('Results written to: ' + result_logger.get_log_file(), 'info')
         else:
@@ -285,22 +275,6 @@ class Job():
                 task_results.append(task.task_result)
         return task_results
 
-    #if only a single task returned code !=0, then return that code,
-    #else if more than one task returned !=0, but the return code is the same for all, then return that code
-    #else if more than one task returned !=0, and codes differ then return 1
-    def get_job_result(self):
-        task_results = self.get_task_results()
-        ret = 0
-        
-        for task_result in task_results:
-            if task_result != 0: 
-                if ret == 0:
-                    ret = task_result                
-                elif ret != task_result:
-                    ret = 1
-                    break            
-        return ret        
-    
     def end(self):
         self.compile_results()
         self.plugin_handler.entrypoints["job_end"].execute({"job":self})

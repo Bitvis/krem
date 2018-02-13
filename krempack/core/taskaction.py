@@ -36,9 +36,11 @@ import re
 
 from krempack.core import executor
 from krempack.core import ktask
-
 from krempack.common import constants as c
 from krempack.common import kremtree
+from library.returncodes import *
+from library.colorcodes import *
+import traceback
 
 
 ## Default task action
@@ -47,7 +49,7 @@ from krempack.common import kremtree
 class TaskAction():
     name = 'default'
     log = None
-   
+
     ## Constructor 
     def __init__(self):
         self.script_path = None
@@ -66,7 +68,6 @@ class TaskAction():
     def run_method(self, queue):
         module_path = None
         target_function = None
-        setup_task = None
         target_method = None 
         returncode = 1
         var_dict = {}
@@ -74,114 +75,104 @@ class TaskAction():
         taskVars = self.task.get_variables()
         
         self.task.initialize()
-        
-        setup_task = self.get_setup_task_function()
-        if setup_task is not None:
-            task_data = ktask.TaskData()
-            task_data.set_task_name(self.task.get_task_name())
-            task_data.set_run_nr(self.task.get_run_nr())
-            task_data.set_job_path(self.task.get_job_path())
-            task_data.set_path(self.task.get_path())
-            task_data.set_output_path(self.task.get_output_path())
-            setup_task(task_data)
-        
-        self.log.write("Execute task: " + self.task.get_task_name(), 'info') 
-        
-        os.environ = self.task.get_environ()
-        
+
+        module = self.import_task_module()
+
+        #'{0:20} {1}'.format(str(entry[0]), str(entry[1])) + '\n'
+        text_line = '{0:8}{1}{2}'.format(self.task.get_full_run_nr(), cc.WHITE, self.task.get_task_name())
+        text_line += "  " + cc.YELLOW + self.task.get_target_function() + cc.RESET
+        text_line += "  " + cc.GRAY + str(self.task.get_variables()) + cc.RESET
+
+        self.log.write(text_line, 'info')
+
+        self.task.get_logger().enable(self.task)
+
         if len(taskVars) > 0:
             for var in taskVars:
                 if isinstance(var, tuple) and len(var) == 2:
                     var_dict[var[0]] = var[1]
                 elif not isinstance(var, list) and not isinstance(var, dict):
                     var_list.append(var)
-                 
-        
-        stdout_saveout = sys.stdout
-        stderr_saveout = sys.stderr
-        
+
         try:
-            target_function = self.get_function_to_run()
+
+            target_function = self.get_function_to_run(module)
 
             if target_function is not None:
-                self.task.get_logger().enable(self.task)
+
+                task_data = ktask.TaskData()
+                task_data.set_task_name(self.task.get_task_name())
+                task_data.set_run_name(self.task.get_run_name())
+                task_data.set_run_nr(self.task.get_run_nr())
+                task_data.set_job_path(self.task.get_job_path())
+                task_data.set_output_path(self.task.get_output_path())
 
                 self.task.plugin_handler.entrypoints["pre_task_function_call"].execute({"task":self.task})
-                
+
                 if len(var_dict) > 0 and len(var_list) > 0:
-                    returncode = target_function(var_list, **var_dict)
+                    returncode = target_function(task_data, var_list, **var_dict)
                 elif len(var_dict) > 0:
-                    returncode = target_function(**var_dict)
+                    returncode = target_function(task_data, **var_dict)
                 elif len(var_list) > 0:
-                    returncode = target_function(var_list)
+                    returncode = target_function(task_data, var_list)
                 else:
-                    returncode = target_function()
+                    returncode = target_function(task_data)
         
                 self.task.set_task_result(returncode)            
                 self.task.plugin_handler.entrypoints["post_task_function_call"].execute({"task":self.task})
 
                 self.task.get_logger().disable(self.task)
+
         except Exception as e:
-            sys.stdout = stdout_saveout
-            sys.stderr = stderr_saveout
-            self.log.write(str(sys.exc_info()[0]) + ' : ' + str(e), 'error')
-          
-            
-        self.log.write(self.task.get_task_name() + " return code: " + str(self.task.get_task_result()), 'debug')
+            self.task.get_logger().disable(self.task)
+
+            exception_string = traceback.format_exc(-1)
+            self.log.write(exception_string, 'error')
+
+            self.task.set_task_result(rc.EXCEPTION)
+
+        self.log.write(self.task.get_full_run_nr() + " return code: " + str(self.task.get_task_result()), 'debug')
         
-        queue.put({self.task.get_task_name():self.task})
-        
+        queue.put({self.task.get_run_name():self.task})
+
+
+    def import_task_module(self):
+        path = None
+        module = None
+        module_name = None
+        function = None
+
+        module_name = self.task.get_target_module_name()
+        module_path = self.task.get_target_module_path()
+
+        if module_path is not None and module_name is not None:
+            module_path = os.path.dirname(os.path.realpath(module_path)) + '/../'
+            sys.path.append(module_path)
+
+            try:
+                module = import_module(module_name)
+            except Exception as e:
+                self.log.write(self.task.get_target_module_path() + "  " +str(e), 'error')
+                exit(1)
+
+
+        return module
+
     ## Retreive target function from target task module
     #  @return Target function 
-    def get_function_to_run(self):
-        path = None
-        module = None
-        module_name = None
+    def get_function_to_run(self, module):
         function = None
-        
-        module_name = self.task.get_target_module_name()
-        module_path = self.task.get_target_module_path()
-        
-        if module_path is not None and module_name is not None:
-            module_path = os.path.dirname(os.path.realpath(module_path)) + '/../'
-            sys.path.append(module_path)
-            module = import_module(module_name)
-            
-        if module is not None:
-            try:
-                function = getattr(module, self.task.get_target_function())
-            except:
-                self.log.write("function '" + str(self.task.get_target_function()) + "' in task '" + str(self.task.get_task_name()) + "' not found", 'error')
-            
+
+        try:
+            function = getattr(module, self.task.get_target_function())
+        except:
+            self.task.get_logger().disable(self.task)
+            self.log.write("function '" + str(self.task.get_target_function()) + "' in task '" + str(self.task.get_run_name()) + "' not found", 'error')
+            exit(1)
+
         return function
             
-            
-    ## Retreive setup task function from target task module
-    #  @return Setup task function 
-    def get_setup_task_function(self):
-        path = None
-        module = None
-        module_name = None
-        function_name = "setup_task"
-        function = None
-        
-        module_name = self.task.get_target_module_name()
-        module_path = self.task.get_target_module_path()
-        
-        if module_path is not None and module_name is not None:
-            module_path = os.path.dirname(os.path.realpath(module_path)) + '/../'
-            sys.path.append(module_path)
-            module = import_module(module_name)
-            
-        if module is not None:
-            try:
-                function = getattr(module, function_name)
-                self.log.write("function '" + function_name + "' in task '" + str(self.task.get_task_name()) + "' executing", 'info')
-            except:
-                #be silent, it is not an error if the function is missing as it is optional
-                pass 
-        return function                   
-                
+
             
             
             

@@ -66,7 +66,6 @@ class JobConfig(Config):
         self.result_logger = None
         self.return_code_parser = None
         self.task_initializer_default = None
-        self.environ = None
         self.task_logger = None
     
     def set_job_initializer(self, initializer):
@@ -81,9 +80,6 @@ class JobConfig(Config):
     def set_task_initializer_default(self, initializer):
         self.task_initializer_default = initializer
         
-    def set_environ(self, environ):
-        self.environ = environ
-    
     def get_task_initializer_default(self):
         return self.task_initializer_default
     
@@ -96,10 +92,7 @@ class JobConfig(Config):
     def get_return_code_parser(self):
         return self.return_code_parser
         
-    def get_environ(self):
-        return self.environ
 
-        
         
     
     

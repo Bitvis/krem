@@ -43,12 +43,12 @@ class Validator(validator.Validator):
             self.log.write("Task folder " + str(task_path) + " not found", 'error')
             error = 1
         
-        # Check setup file
-        if not error and not os.path.isfile(os.path.join(task_path, c.TEMPLATE_TASK_SETUP_FILE)):
-            self.log.write("Setup file not found in " + str(task_path), 'error')
+        # Check task file
+        if not error and not os.path.isfile(os.path.join(task_path, c.TEMPLATE_TASK_FILE)):
+            self.log.write(c.TEMPLATE_TASK_FILE + " file not found in " + str(task_path), 'error')
             error = 1
             
-        if not error and not os.path.isfile(os.path.join(task_path, c.TEMPLATE_INIT_PACKAGE_FILE)):
+        if not error and not os.path.isfile(os.path.join(task_path, c.INIT_PACKAGE_FILE)):
             self.log.write("task folder " + str(task_path) + " is not a python package. Please add file '__init__.py'" , 'error')
             error = 1
             

@@ -1,13 +1,10 @@
 
 
-import sys
-import os
-from krempack.core import kjob as krem
+from krempack.core import kjob
 from library.returncodes import *
 
 if __name__ == '__main__':
-    path, job_name = os.path.split(os.path.dirname(__file__))
-    job = krem.Job(job_name, rc)
+    job = kjob.Job(__file__, rc)
 
     job.start()
     
@@ -15,10 +12,15 @@ if __name__ == '__main__':
 
     for i in range (0,10):
         job.run_task_parallel('simple_task', 'run')
-        job.update_on_complete()
+
+    job.wait_for_complete()
+
     job.end()
-    
-    ret = job.get_job_result()
-    
-    exit(ret)
-    
+
+    task_results = job.get_task_results()
+
+    #we expect each result to be '0' so if the sum of all results is more than 0 then at least one of the tasks failed
+    if sum(task_results) > 0:
+            err = rc.FAIL
+
+    exit(err)

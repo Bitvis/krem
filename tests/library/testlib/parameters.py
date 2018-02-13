@@ -35,14 +35,13 @@ TEST_PROJECT_OUTPUT_DIR = os.path.join(TEST_PROJECT_ROOT_PATH, OUTPUT_DIR_NAME)
 OUTPUT_LATEST_SYMLINK = "latest"
 
 TEMP_PROJECT_NAME = "krem_temp"
-TEMP_PROJECT_PATH = os.path.join(TEST_PROJECT_ROOT_PATH, "..", TEMP_PROJECT_NAME)
+TEMP_PROJECT_PATH = os.path.join(TEST_PROJECT_ROOT_PATH, OUTPUT_DIR_NAME, TEMP_PROJECT_NAME)
 
 TEMP_JOB_NAME = "temp_job"
-DEAFULT_JOB_SCRIPT = "job.py"
+JOB_SCRIPT = "job.py"
 
 TEMP_TASK_NAME = "temp_task"
-DEAFULT_TASK_SCRIPT = "run.py"
-DEAFULT_TASK_SETUP_FILE = "setup.txt"
+TASK_SCRIPT = "task.py"
 
 
 #Commands and options
@@ -60,36 +59,39 @@ CMD_RUN_OPTION_JOB = "-j"
 
 # Expected output
 EXPECTED_OUTPUT_JOB_INSTANCE_DIR = os.path.join(SIMPLE_JOB, "job_instance")
-EXPECTED_OUTPUT_JOB_DIR = os.path.join(SIMPLE_JOB, "job_instance", "1_" + SIMPLE_TASK + "__run_1") # Must replace "job_instance" with actual job instance name in task (common function: find_output_job_instance() 
+EXPECTED_OUTPUT_JOB_DIR = os.path.join(SIMPLE_JOB, "job_instance", "1_1_" + SIMPLE_TASK + "_run") # Must replace "job_instance" with actual job instance name in task (common function: find_output_job_instance()
 EXPECTED_OUTPUT_DIRS = [SIMPLE_JOB, EXPECTED_OUTPUT_JOB_INSTANCE_DIR, EXPECTED_OUTPUT_JOB_DIR]
-EXPECTED_OUTPUT_FILE_RUN_LOG = os.path.join(EXPECTED_OUTPUT_JOB_INSTANCE_DIR, "run.txt")
-EXPECTED_OUTPUT_FILE_RESULTS = os.path.join(EXPECTED_OUTPUT_JOB_INSTANCE_DIR, "results.txt")
+EXPECTED_OUTPUT_FILE_EXECUTION_LOG = os.path.join(EXPECTED_OUTPUT_JOB_INSTANCE_DIR, "execution.log")
+EXPECTED_OUTPUT_FILE_RESULTS = os.path.join(EXPECTED_OUTPUT_JOB_INSTANCE_DIR, "results")
 EXPECTED_OUTPUT_FILE_TASK_LOG = os.path.join(EXPECTED_OUTPUT_JOB_INSTANCE_DIR, "tasks.log")
 
 # Expected file contents
-EXPECTED_CONTENT_RUN_LOG = ["[INFO]: Execute task:",
+EXPECTED_CONTENT_EXECUTION_LOG = ["[INFO]: 1_1", "simple_task", "run",
                             "[INFO]: Results written to:"]
 EXPECTED_CONTENT_TASK_LOG = ["This is just a simple task"]
 
-EXPECTED_CONTENT_RESULTS = ["TASK                                     RESULT",
-                            "1_simple_task__run_1                     PASS",
-                            "2_simple_task__run_1                     PASS",
-                            "3_simple_task__run_1                     PASS",
-                            "4_simple_task__run_1                     PASS",
-                            "5_simple_task__run_1                     PASS",
-                            "6_simple_task__run_1                     PASS",
-                            "7_simple_task__run_1                     PASS",
-                            "8_simple_task__run_1                     PASS",
-                            "9_simple_task__run_1                     PASS",
-                            "10_simple_task__run_1                    PASS",
-                            "11_simple_task__run_1                    PASS",
+EXPECTED_CONTENT_RESULTS = ["        TASK          FUNCTION RESULT",
+"1_1","simple_task","run","PASS",
+"2_1","simple_task","run","PASS",
+"2_2","simple_task","run","PASS",
+"2_3","simple_task","run","PASS",
+"2_4","simple_task","run","PASS",
+"2_5","simple_task","run","PASS",
+"2_6","simple_task","run","PASS",
+"2_7","simple_task","run","PASS",
+"2_8","simple_task","run","PASS",
+"2_9","simple_task","run","PASS",
+"2_10","simple_task","run","PASS",
 
-                            "SUMMARY:",
+"SUMMARY:",
 
-                            "PASS                 11",
-                            "FAIL                 0",
-                            "SKIP                 0",
-                            "UNSTABLE             0",]
+"ERROR                0",
+"EXCEPTION            0",
+"FAIL                 0",
+"PASS                 11",
+"SKIPPED              0",
+"SUCCESS              0",
+"UNSTABLE             0",]
 
 
 

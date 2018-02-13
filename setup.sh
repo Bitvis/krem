@@ -30,24 +30,29 @@ krem_path=${PWD}
 
 cd - >/dev/null
 
-krem_env='export PATH=$PATH:'${krem_path}
-krem_utils_env='export PYTHONPATH=$PYTHONPATH:'${krem_path}
+krem_env="export PATH=${krem_path}:"'$PATH'
+krem_utils_env="export PYTHONPATH=${krem_path}:"'$PYTHONPATH'
 
 echo
-echo Writing to ~/.bashrc:
+
 check_string=$(grep "$krem_env" "$env_file")
 if [[ -z $check_string ]]; then
-    echo 'PATH='${krem_path}
+    echo Adding to ~/.bashrc:  ${krem_env}
     echo $krem_env >> $env_file
+else
+    echo "PATH is already set"
 fi
 
 check_string=$(grep "$krem_utils_env" "$env_file")
 if [[ -z $check_string ]]; then
-    echo 'PYTHONPATH='${krem_path}
+    echo Adding to ~/.bashrc:  ${krem_utils_env}
     echo $krem_utils_env >> $env_file
+else
+    echo "PYTHONPATH is already set"
 fi
 
 echo
-echo 'Now source ~/.bashrc or open new terminal to start using KREM. Enjoy!'
+echo 'Now source ~/.bashrc or open new terminal to start using KREM.'
+echo 'Enjoy!'
 
 echo

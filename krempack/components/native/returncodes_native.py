@@ -36,7 +36,7 @@ from krempack.components import returncodes
 class ReturnCodeParserNative(returncodes.ReturnCodeParser):
     
     # function 'get_codes_list' generates list of attributes in class 'ReturnCodesNative' dynamically by
-    # searching all variables of the class. This is done by retreiving 'items()' from the class,
+    # searching all variables of the class. This is done by retrieving 'items()' from the class,
     # which also retreives some unwanted values. These are listed in ATTR_IGNORE
     ATTR_IGNORE = ['__doc__', '__main__', '__module__', '__weakref__', '__dict__']
     returncodes = None
@@ -63,6 +63,8 @@ class ReturnCodeParserNative(returncodes.ReturnCodeParser):
         for attr, code_value in vars(self.returncodes).items():
             if attr not in self.ATTR_IGNORE:
                 codes_list.append(attr)
+
+        codes_list.sort()
         return codes_list
             
     def set_returncodes(self, returncodes):

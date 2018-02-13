@@ -58,7 +58,7 @@ class Executor():
     def execute(self, task, override=None):
         p = Process(target=task.action.run_method, args=(self.queue,))
         self.procsRunning.append(p)
-        self.tasksRunning[task.get_task_name()] = task
+        self.tasksRunning[task.get_run_name()] = task
         p.start()        
 
     def wait_until_all_complete(self):
@@ -75,22 +75,28 @@ class Executor():
         while still_running > 0:
             if not self.queue.empty():
                 entry = self.queue.get()
-                task_name, task = entry.popitem()
+                run_name, task = entry.popitem()
 
                 try:
-                    self.tasksRunning[task_name].set_task_result(task.get_task_result())
+                    self.tasksRunning[run_name].set_task_result(task.get_task_result())
                 except Exception as e:
                     self.log.write("Failed to retrieve task results", 'error')
                 still_running = still_running - 1
 
+            for proc in self.procsRunning:
+                if not proc.is_alive() and proc.exitcode != 0:
+                    #process exited abnormally, probably crashed or syntax error
+                    #kill all processes still running
+                    for proc in self.procsRunning:
+                        if proc.is_alive():
+                            proc.terminate()
+                    exit(1)
+
+        #all processes have now exited
         for proc in self.procsRunning:
             if not proc.is_alive():
                 #call join() with timeout and catch exception if we hang here again
                 proc.join()
-
-
-
-
 
         self.tasksRunning = {}
         self.procsRunning = []

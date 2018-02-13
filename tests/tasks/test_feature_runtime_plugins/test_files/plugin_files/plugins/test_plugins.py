@@ -30,7 +30,7 @@ class TestPluginAllEntrypoints(plugin.Plugin):
     def pre_task_execution(self, task, job):
         try:
             #the first two linea are to check that we get the task and job objects and not just task and job names
-            task.get_task_name()
+            task.get_run_name()
             job.name
             write_output_file("pre_task_execution", "test_line")
         except Exception as e:
@@ -40,7 +40,7 @@ class TestPluginAllEntrypoints(plugin.Plugin):
     def pre_task_function_call(self, task):
         try:
             #the first line is to check that we get the task object and not just task name
-            task.get_task_name()
+            task.get_run_name()
             write_output_file("pre_task_function_call", "test_line")
         except Exception as e:
             pass
@@ -49,7 +49,7 @@ class TestPluginAllEntrypoints(plugin.Plugin):
     def post_task_function_call(self, task):
         try:
             #the first line is to check that we get the task object and not just task name
-            task.get_task_name()
+            task.get_run_name()
             write_output_file("post_task_function_call", "test_line")
         except Exception as e:
             pass
@@ -57,7 +57,7 @@ class TestPluginAllEntrypoints(plugin.Plugin):
     def post_task_execution(self, task, job):
          try:
              # the first two linea are to check that we get the task and job objects and not just task and job names
-             task.get_task_name()
+             task.get_run_name()
              job.name
              write_output_file("post_task_execution", "test_line")
          except Exception as e:

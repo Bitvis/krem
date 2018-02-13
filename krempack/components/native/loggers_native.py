@@ -31,12 +31,9 @@ import os
 import re
 
 from krempack.components import loggers
+mod = __import__('library.colorcodes', fromlist=['ColorCodes'])
+cc = getattr(mod, 'cc')
 
-RED = "\033[1;31m"
-YELLOW = "\033[1;33m"
-CYAN = "\033[1;36m"
-WHITE = "\033[1;37m"
-RESET = "\033[0;0m"
 
 ## Native job logger
 #
@@ -46,7 +43,7 @@ class JobLoggerNative(loggers.JobLogger):
     ## Constructor
     def __init__(self):
         self.log_levels = ['debug', 'info', 'warn', 'error'] 
-        log_level_color = [CYAN, RESET, YELLOW, RED]
+        log_level_color = [cc.DEBUG, cc.RESET, cc.WARN, cc.ERROR]
         
         self.log_level_color = {} 
         counter = 0
@@ -63,6 +60,9 @@ class JobLoggerNative(loggers.JobLogger):
             self.set_text_color(level)
             print(log_text)
             self.reset_text_color()
+
+            log_text = self.strip_coloring(log_text)
+
             self.write_to_log(log_text + '\n')
         return
 
@@ -102,7 +102,7 @@ class JobLoggerNative(loggers.JobLogger):
 
     ## Reset text color
     def reset_text_color(self):
-        sys.stdout.write(RESET)
+        sys.stdout.write(cc.RESET)
 
 ## Native results logger
 class ResultsLoggerNative(loggers.ResultsLogger):
@@ -110,35 +110,61 @@ class ResultsLoggerNative(loggers.ResultsLogger):
     ## Constructor
     def __init__(self):
         self.results = []
-        self.result_text = []
+
     
     ## Write to results log
-    def write(self, task_list=[]):
+    def format_results(self, task_list=[]):
+        results = ""
+
         codes_list = self.code_parser.get_codes_list() 
         for code in codes_list:
             self.results.append((code,0))
-        
-        self.result_text.append('{0:40} {1}'.format('TASK', 'RESULT') + '\n\n')
+
+
+        #find the longest task_name to set offset for the function column
+        func_offset = 0
+        for task in task_list:
+            if func_offset < len(task.get_task_name()):
+                func_offset = len(task.get_task_name())
+
+        # add some more to compensate for the full run nr length
+        func_offset += 10
+
+        result_offset = 0
+        for task in task_list:
+            if result_offset < len(task.get_target_function()):
+                result_offset = len(task.get_target_function())
+        result_offset += 5
+
+        results += ('{0:{func_offset}} {1:{result_offset}} {2}'.format('        TASK', 'FUNCTION', 'RESULT', func_offset=func_offset, result_offset=result_offset) + '\n\n')
         
         # Summarize results
         for task in task_list:
             if task.get_task_result() is not None:
                 parsed_result = self.code_parser.parse(task.get_task_result())
-                self.result_text.append('{0:40} {1}'.format(task.get_task_name(), parsed_result) + '\n')
+
+                results += '{0:8}{1}{2:{func_offset}} {3}{4:{result_offset}} {5}{6}'.format(task.get_full_run_nr(), cc.WHITE, task.get_task_name(),
+                                                                                                      cc.YELLOW, task.get_target_function(), cc.RESET, parsed_result,
+                                                                                                      func_offset=func_offset-8, result_offset=result_offset) + '\n'
                 for i, entry in enumerate(self.results):
                     if parsed_result is entry[0]:
                         self.results[i] = (entry[0], int(entry[1]) + 1)
             else:
-                self.job_logger.write('No results found for task: ' + task.get_task_name(), 'warn')
+                self.job_logger.write('No results found for task: ' + task.get_run_name(), 'warn')
   
             
-        self.result_text.append('\nSUMMARY:\n\n')
+        results += '\nSUMMARY:\n\n'
             
         # Create log text (with formatting)
         for entry in self.results:
-            self.result_text.append('{0:20} {1}'.format(str(entry[0]),str(entry[1])) + '\n')
-        
-        self.write_to_log(self.result_text)
+            results += '{0:20} {1}'.format(str(entry[0]),str(entry[1])) + '\n'
+
+        #make two variants, one with colors and one without
+        results_colored = results
+
+        results = self.strip_coloring(results)
+
+        return results, results_colored
         
 ## Writer class
 #
@@ -154,7 +180,7 @@ class TaskWriter:
         logfile = open(self.output_file, "a", os.O_NONBLOCK)
         for line in text.splitlines():
             if line and line.strip():
-                logfile.write(self.tag)
+                logfile.write(self.tag + "  ")
                 logfile.write(line)
                 logfile.write("\n")
         logfile.close()
@@ -170,22 +196,17 @@ class TaskLoggerNative(loggers.TaskLogger):
     
     def __init__(self):
         self.log_file_path = None
-        self.task_tag = None
-    
+
     ## Activate logger by redirecting stdout to TaskWriter
     def enable(self, task):
-        prefix = re.search("^\d+", task.get_task_name())
-        postfix = re.search("\d+$", task.get_task_name())
-        if prefix and postfix:
-            self.task_tag = str(prefix.group(0)) + "_" + str(postfix.group(0)) + ": "
 
         logfile = open(self.log_file_path, "a", os.O_NONBLOCK)
         sys.stdout = logfile
         sys.stderr = logfile
-        print("\n" + self.task_tag + "*** Task start: " + str(task.task_name) + " ***\n")
+        print("\n" + task.get_full_run_nr() + "  *** Task start: " + "  " + task.get_task_name() + "  " + task.get_target_function() + " ***\n")
         logfile.close()
         
-        task_writer = TaskWriter(self.task_tag, self.log_file_path)
+        task_writer = TaskWriter(task.get_full_run_nr(), self.log_file_path)
         sys.stdout = task_writer
         sys.stderr = task_writer
         
@@ -194,7 +215,7 @@ class TaskLoggerNative(loggers.TaskLogger):
         logfile = open(self.log_file_path, "a", os.O_NONBLOCK)
         sys.stdout = logfile
         sys.stderr = logfile
-        print("\n" + self.task_tag + "*** Task end: " + str(task.task_name) + " ***\n")
+        print("\n" + task.get_full_run_nr() + "  *** Task end: " + str(task.task_name) + " ***\n")
         logfile.close()
         
         sys.stdout = self.stdout_default
@@ -203,5 +224,5 @@ class TaskLoggerNative(loggers.TaskLogger):
     def set_log_file(self, path):
         self.log_file_path = os.path.abspath(path)
 
-    
+
 

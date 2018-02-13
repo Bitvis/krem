@@ -39,17 +39,17 @@ import os
 # Paths and files
 KREM_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-TEMPLATES_PATH = os.path.join(KREM_PATH, 'krempack', 'core', 'templates')
-ENV_FILE_NAME = "ENV"
+TEMPLATES_PATH = os.path.join(KREM_PATH, 'krempack', 'templates')
 
 TEMPLATE_PROJECT = "project"
 TEMPLATE_TASK = "task"
 TEMPLATE_JOB = "job"
 
-TEMPLATE_TASK_SETUP_FILE = "setup.txt"
-TEMPLATE_TASK_SETUP_PARAM_NAME_SCRIPT_PATH = "TASK_FILE"
+TEMPLATE_TASK_FILE = "task.py"
 TEMPLATE_JOB_SCRIPT = "job.py"
-TEMPLATE_INIT_PACKAGE_FILE = "__init__.py"
+
+TASK_FILE = "task.py"
+INIT_PACKAGE_FILE = "__init__.py"
 
 PROJECT_CONFIG_DIR = "config"
 PROJECT_LIB_DIR = "library"
@@ -59,8 +59,8 @@ PROJECT_OUTPUT_DIR = "output"
 PROJECT_KEEP_OUTPUT_DIRS = 5
 PROJECT_DEFAULT_DIRS = [PROJECT_CONFIG_DIR, PROJECT_LIB_DIR, PROJECT_TASKS_DIR, PROJECT_JOBS_DIR, PROJECT_OUTPUT_DIR]
 
-TASK_LOG = "log.txt"
-INFO_FILE = "info.txt"
+TASK_LOG = "task.log"
+INFO_FILE = "info"
 
 # Plugin info
 plugin_entry_points = ["pre_job_start", "job_start", "pre_task_execution", "pre_task_function_call", "post_task_function_call", "post_task_execution", "job_end"]

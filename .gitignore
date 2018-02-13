@@ -1,6 +1,8 @@
 **/*.pyc
 temp
-internal/output/*
-!internal/output/.git_keep_this_directory
+docs/output/*
+!docs/output/.git_keep_this_directory
 *.pyc
+docs/doxygen/html/
+docs/doxygen/latex
 

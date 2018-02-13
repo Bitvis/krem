@@ -28,6 +28,7 @@
 
 import abc
 import os
+import re
 
 ## Virtual logger class
 #
@@ -71,6 +72,11 @@ class Logger:
             f.close()
         except Exception as e:
             print("[INTERNAL_EXCEPTION]: " + str(e))
+
+    ## Strip of color codes from text
+    def strip_coloring(self, text):
+        regexp = r"" + re.escape("\033[") + r"[0|1];.{1,2}m"
+        return re.sub(regexp, '', text)
         
     
 ## Virtual job logger
@@ -79,7 +85,7 @@ class Logger:
 class JobLogger(Logger):
     __metaclass__ = abc.ABCMeta
     
-    logFileName = "run.txt"
+    logFileName = "execution.log"
     ## Constructor
     @abc.abstractmethod
     def __init__(self):
@@ -100,7 +106,7 @@ class JobLogger(Logger):
 #       etc. is performed by ReturnCodeParser
 class ResultsLogger(Logger):
     
-    logFileName = "results.txt"
+    logFileName = "results"
     
     ## Constructor
     def __init__(self):
@@ -109,7 +115,7 @@ class ResultsLogger(Logger):
     
     ## Write to log
     @abc.abstractmethod
-    def write(self, task_list=[]):
+    def format_results(self, task_list=[]):
         None
     
     ## Set job logger for logging internal activity

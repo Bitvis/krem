@@ -56,5 +56,5 @@ class TaskInitializer(Initializer):
 
     # Used for generating a name for the task, which is also used for the output directory
     @abc.abstractmethod
-    def generate_task_name(self, new_task, task_list=[]):
+    def generate_run_name(self, new_task, task_list=[]):
         None

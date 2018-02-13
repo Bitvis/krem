@@ -1,19 +1,51 @@
 KREM - Changelog
 ===============================
 
+
 -----------------------------------------
+v1.4.0
+----------
+Released: 2018-02-13
+  See also porting instructions below for more info
+
+- bugfix: task object and not task name is now passed to pre_task_execution plugin entry-point
+- renamed <krem project>/output/<job>/latest/results.txt to <krem project>/output/<job>/latest/results
+- renamed <krem project>/output/<job>/latest/run.txt to <krem project>/output/<job>/latest/execution.log
+- renamed <krem project>/output/info.txt to <krem project>/output/<job>/latest/info
+- renamed <krem project>/tasks/<task>/setup.txt <krem project>/tasks/<task>/task.cfg
+- renamed <krem project>/tasks/<task>/run.py <krem project>/tasks/<task>/task.py
+- added <krem project>/library/colorconstants.py with color contants to be used in jobs, tasks and plugins
+- changed logging level in job template from debug to info
+- replaced function job.get_job_result() with function job.get_task_results(). 
+
+---> Porting from v1.3.x to v1.4.0
+- modify <krem project>/jobs/<job>/job.py: 
+  from:
+  path, job_name = os.path.split(os.path.dirname(__file__))
+  job = krem.Job(job_name, rc)
+  to:
+  job = krem.Job(__file__, rc)
+- add 'task' argument as the first argument in all task functions
+- rename <krem project>/tasks/<task>/run.py to <krem project>/tasks/<task>/task.py
+- rename <krem project>/tasks/<task>/setup.txt to <krem project>/tasks/<task>/task.cfg 
+- modify <krem project>/tasks/<task>/task.cfg: from 'TASK_FILE = run.py' to 'TASK_FILE = task.py'
+- copy <krem installation>/krempack/templates/project/library/task.py to <krem project>/library/task.py 
+- copy <krem installation>/krempack/templates/project/library/colorcodes.py to <krem project>/library/colorcodes.py 
+- copy <krem installation>/krempack/templates/project/library/returncodes.py to <krem project>/library/returncodes.py 
+- function job.get_job_result() is removed and replaced with function job.get_task_results(). 
+  Note that job.get_job_result() resturned a single return code while job.get_task_results() return a list of all task results
+
+
 v1.3.3
 ----------
 Released: 2018-01-31
 - bugfix: task object and not task name is now passed to pre_task_execution plugin entry-point
 
------------------------------------------
 v1.3.2
 ----------
 Released: 2018-01-26
 - krem no longer hang when running several parallel tasks
 
------------------------------------------
 v1.3.1
 ----------
 Released: 2018-01-23
@@ -21,7 +53,6 @@ Released: 2018-01-23
 - template task and job can be run without modifications
 - updated MANUAL
 
------------------------------------------
 v1.3.0
 ----------
 Released: 2018-01-19

@@ -4,7 +4,7 @@ import os
 import subprocess
 import re
 
-from library.task import *
+from library.returncodes import *
 from library.testlib import parameters as p
 
 def compare_lists(list_to_verify, list2):

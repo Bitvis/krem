@@ -61,7 +61,7 @@ def run_job(target):
         if not job_num + 1 > len(jobs):
             for job in jobs:
                 if idx == job_num:
-                    print("running job: " + str(job))
+                    print("\nRunning job: " + str(job) +"\n")
                     target = job
                     break
                 idx = idx + 1

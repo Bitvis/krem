@@ -24,7 +24,7 @@
 ------------------------------------------------------------------
 ABOUT THIS MANUAL
 ------------------------------------------------------------------
-This manual covers KREM v1.3.3
+This manual covers KREM v1.4.0
 
 
 
@@ -100,20 +100,19 @@ TUTORIAL
 
 5. Create your first task 'task_foo'
 	Each task has its own directory which is located in the 'tasks' directory.
-	When a task is created, a template file 'run.py' is placed in the task directory.
+	When a task is created, a template file 'task.py' is placed in the task directory.
 	To create a 'task_foo' task run:
 
 	$ krem init -t task_foo
 
-	This will create a task directory 'tasks/task_foo/' and place the files 'run.py', '__init__.py', and 'setup.txt' in the directory.
-	Note the keyword 'TASK_FILE' in 'setup.txt'. This points to the python script to be executed within the task. In this task, it is the
-	file 'run.py'.
+	This will create a task directory 'tasks/task_foo/' and place the files 'task.py', '__init__.py' in the directory.
 
-
-6. Quick look at the 'run.py' file
-	Open the 'tasks/task_foo/run.py' file and take a look.
+6. Quick look at the 'task.py' file
+	Open the 'tasks/task_foo/task.py' file and take a look.
 	This template file can be run for demonstration without modification.
 	Study the file for few seconds.
+	An argument 'task' is passed to every task function. This argument is inserted by KREM and is mandatory for all task functions.
+	For more information on the 'task' argument see 'Advanced features' section below.
 	Note the return error codes. A task can return at any point with an appropriate error code.
 
 
@@ -139,70 +138,66 @@ TUTORIAL
 	Now go back to the file 'job.py' in directory 'job_foo'.
 	The below line specifies that function 'run_without_variables' in task 'task_foo' will be run first.
 
-	    job.run_task_serial('task_foo', 'run_without_variables')
+	    err = job.run_task_serial('task_foo', 'run_without_variables')
 
 	If the above task passes, the below task will be executed. In this case a list is passed to the task function.
 
-	    job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
+	    err = job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
 
 	It is also possible to pass named variables to a task function as shown below
 
-	    job.run_task_serial('task_foo', 'run_with_named_variables', variables=[("var1", "var1_value"), ("var2", "var2_value")])
+	    err = job.run_task_serial('task_foo', 'run_with_named_variables', variables=[("var1", "var1_value"), ("var2", "var2_value")])
 
 
 	The template job file also includes parallel task execution.
 	First, you have to add tasks for parallel execution as shown below.
-    Then, call 'job.update_on_complete()' to trigger parallel execution. 'job.update_on_complete()' will return once all of the above tasks
+    Then, call 'job.wait_for_complete()' to trigger parallel execution. 'job.wait_for_complete()' will return once all of the above tasks
     finish and return.
 
         job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run_in_parallel")])
         job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run_in_parallel")])
 
-        job.update_on_complete() # Wait until parallel tasks are complete, and return result
+        job.wait_for_complete() # Wait until parallel tasks are complete, and return result
 
 
 
-9. Job return code
-	The return codes from the job are explained in the 'job.py' file. Look for 'job.get_job_result()'
-
-
-10. Find your task results
+9. Find your task results
 	Each time a job is run, the result and logs are written to a new directory in the 'output' directory.
 	Change to 'output' directory and list all entries:
 
 	$ cd output
 	$ ls -l
 
-	-rw-rw-r-- 1 andreas andreas   41 nov.  24 14:48 info.txt
-	drwxrwxr-x 4 andreas andreas 4096 nov.  24 14:48 job_foo
+	-rw-rw-r-- 1 mk mk   35 feb.   9 14:45 info
+	drwxrwxr-x 3 mk mk 4096 feb.   9 14:45 job_foo
 
 	Change to 'job_foo' directory and list all entries:
 
 	$ cd job_foo
 	$ ls -l
 
-	drwxrwxr-x 6 andreas andreas 4096 nov.  24 14:48 20171124_144815
-	lrwxrwxrwx 1 andreas andreas   15 nov.  24 14:48 latest -> 20171124_144815
+	drwxrwxr-x 7 mk mk 4096 feb.   9 14:45 20180209_144547
+	lrwxrwxrwx 1 mk mk   15 feb.   9 14:45 latest -> 20180209_144547
 
 	The first time a job is run, a new directory for this job is created in the output directory.
 	For each run a directory with a timestamp is created in the job output directory. There is also a symbolic link,
 	named 'latest', pointing at the latest timestamped directory.
-	The 'info.txt' file is not relevant for this tutorial.
+	The 'info' file is not relevant for this tutorial.
 
-11. Browse job results
+10. Browse job results
 	Enter the latest directory through the link and list all entries:
 
 	$ cd latest
 	$ ls -l
 
-    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 1_task_foo__run_without_variables_1
-    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 2_task_foo__run_with_variable_list_1
-    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 3_task_foo__run_with_named_variables_1
-    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 4_task_foo__run_with_named_variables_1
-    drwxrwxr-x. 2 michalk michalk 4096 Jan 23 18:53 4_task_foo__run_with_named_variables_2
-    -rw-rw-r--. 1 michalk michalk  382 Jan 23 18:53 results.txt
-    -rw-rw-r--. 1 michalk michalk 1799 Jan 23 18:53 run.txt
-    -rw-rw-r--. 1 michalk michalk 1204 Jan 23 18:53 tasks.log
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 1_1_task_foo_run_without_variables
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 2_1_task_foo_run_with_variable_list
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 3_1_task_foo_run_with_named_variables
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 4_1_task_foo_run_with_named_variables
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 4_2_task_foo_run_with_named_variables
+	-rw-rw-r-- 1 mk mk  407 feb.   9 14:45 execution.log
+	-rw-rw-r-- 1 mk mk  499 feb.   9 14:45 results
+	-rw-rw-r-- 1 mk mk 1035 feb.   9 14:45 tasks.log
 
 	There is a separate directory for each task added with function 'job.run_task_...(...)' in the 'job.py' file. This
 	directory is the task output folder. The path to the task output folder is accessible from task.get_output_path,
@@ -211,10 +206,10 @@ TUTORIAL
 	Then follows the task name, and the target function that was called. The final number represents order of execution. 
 	This is only of relevance for parallel tasks.
 
-	The 'results.txt' file holds the result report as was output on the screen after the job finished.
-	The 'run.txt' file is a log for the job.
-        The 'tasks.log' file is a log for all the tasks. It contains all output produced by the tasks as
-        it would otherwise be printed to the screen if the task was run directly from command line.
+	The 'results' file holds the result report as was output on the screen after the job finished.
+	The 'execution.log' file is a log for the job.
+    The 'tasks.log' file is a log for all the tasks. It contains all output produced by the tasks as
+    it would otherwise be printed to the screen if the task was run directly from command line.
 
 	ENJOY!
 
@@ -223,18 +218,35 @@ TUTORIAL
 ------------------------------------------------------------------
 ADVANCED FEATURES
 ------------------------------------------------------------------
-1. Initializing tasks
-	Sometimes you want to initialize a task before executing it. This can be done by adding function setup_task to your task.
-	If present, setup_task will be called prior to the task function as specified in the job file.
-	The setup_task function prototype is:
-		def setup_task(task):
-	where task is an object with information on the current task
+1. 'task' argument in task functions
+    An argument 'task' is passed to every task function. This argument is inserted by KREM and is mandatory for all task functions.
+
+	'task' is an object with information on the current task as follows:
+	    - task_name (the current task name)
+	    - run_name (the current task name including the run number and current task function)
+	    - run_nr (run number of the current task. This number is incremented for every task added in the job)
+	    - full_run_nr (run_nr + '1' for serial task or additional run number for parallel tasks)
+	    - job_output_path (path to the current job directory in the output directory)
+	    - output_path (path to the current task directory in the output directory. This is where you can save files from your task if applicable)
+
+	The following 'task' getter functions return the above properties:
+	  def get_task_name(self):
+	  def get_run_name(self):
+	  def get_run_nr(self):
+	  def get_full_run_nr(self):
+	  def get_job_path(self):
+	  def get_output_path(self):
+
+	WARNING: The task object provides also several setter functions. These function shall not be used by the task.
+                 These might break the job if used.
+
+
 	
 2. Add runtime plugins
 	Runtime plugins provide additional functionality during job/task execution. There are several entry points (aka calls to callback functions) as listed below
 	You can choose whether to implement all or just some of the above in your plugin.
 	
-	def job_start(self, job):
+    def job_start(self, job):
         # this function is executed at the beginning of a job 
         # (at the beginning of the job.start() function)
     
@@ -249,7 +261,7 @@ ADVANCED FEATURES
     
     def post_task_execution(self, task, job):
         # In case of a serial task, this function is executed right after a task has finished and the task result is ready
-        # In case of parallel tasks, this function is executed when the update_on_complete function is called in a job 
+        # In case of parallel tasks, this function is executed when the wait_for_complete function is called in a job
     
     def job_end(self, job):
         # this function is executed at the end of a job 
@@ -297,7 +309,7 @@ A: Yes, the same tasks can be added to several jobs.
    Actually, it is recommended to write tasks in such a way that they can be reused in more that one job.
 
 Q: Can the job abort instantly if one of the tasks fail? 
-A: Yes. All tasks returns the result as a returncode (directly from job.run_task_serial(...) or from job.update_on_complete
+A: Yes. All tasks returns the result as a returncode (directly from job.run_task_serial(...) or from job.wait_for_complete
    for parallel tasks). Write the job to check the returncode from the tasks to see if job execution should 
    continue or not. 
 
@@ -305,7 +317,7 @@ Q: What is the 'library' directory?
 A: You can place plugins and your python modules specific to the project in this directory.
 
 Q: What is the 'config' directory?
-A: This directory is reserved for future releases. 
+A: User can place any configuration needed by jobs and tasks in current project. KREM does not care about this directory.
 
 Q: Can I copy my project to other locations or even to other computers?
 A: Yes, as long as you copy the whole directory structure.
@@ -315,7 +327,7 @@ A: Yes, as long as you copy to the corresponding locations in the project you co
    Remember to also copy required modules and plugins, if any, in the 'library' directory.
 
 Q: What Python version are supported?
-A: As of latest KREM Python 2.7 is supported. Future releases will also support Python 3 and above.
+A: As of latest KREM Python 2.7 and 3.6 is supported.
 
 Q: What operating systems are supported?
 A: As of latest KREM only Linux is supported. Future releases will also support Windows 10 and above.
