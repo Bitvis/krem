@@ -133,7 +133,7 @@ class Job():
         
     # Creates new object 'Task'. The object parameters are initialized in this function,
     # however the output directory is not created until required (performed by TaskInitializer)
-    def add_task(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
+    def add_task(self, task_name, function, arguments=None, task_logger=None, task_initializer=None):
         
         new_task = ktask.Task(task_name, self.task_run_nr)
         new_task.set_plugin_handler(self.plugin_handler)
@@ -145,9 +145,9 @@ class Job():
         # Set target function to call in target task
         new_task.set_target_function(function)   
         
-        if variables is not None:
-            new_task.set_variables(variables)
-            
+        if arguments is not None:
+            new_task.set_arguments(arguments)
+
         if task_logger is not None:
             new_task.set_logger(task_logger())
         else:
@@ -203,13 +203,13 @@ class Job():
         return task_results
     
     # Run single task and wait until complete
-    def run_task_serial(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
+    def run_task_serial(self, task_name, function, arguments=None, task_logger=None, task_initializer=None):
         ret = 1
         
         ret = self.validator.validate(task_name)
         
         if not ret:
-            self.add_task(task_name, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            self.add_task(task_name, function, arguments=arguments, task_logger=task_logger, task_initializer=task_initializer)
             task = self.task_list[self.task_list_index]
 
             if self.executor.is_ready():
@@ -228,11 +228,11 @@ class Job():
         
     # Run single task and continue immediately. Call multiple times to run tasks in parallel. Must call wait_for_complete()
     # in job before running new run_task_serial or end of job
-    def run_task_parallel(self, task_name, function, variables=None, task_logger=None, task_initializer=None):
+    def run_task_parallel(self, task_name, function, arguments=None, task_logger=None, task_initializer=None):
         error = self.validator.validate(task_name)
         
         if not error:
-            self.add_task(task_name, function, variables=variables, task_logger=task_logger, task_initializer=task_initializer)
+            self.add_task(task_name, function, arguments=arguments, task_logger=task_logger, task_initializer=task_initializer)
             task = self.task_list[self.task_list_index]
             self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
             self.executor.execute(task)

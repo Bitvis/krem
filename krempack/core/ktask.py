@@ -88,7 +88,7 @@ class Task(TaskData):
         self.target_function = None
         self.run_nr = run_nr
         self.action = None
-        self.variables = []
+        self.arguments = []
         self.task_result = None
         self.initializer = None
         self.plugin_handler = None
@@ -116,8 +116,8 @@ class Task(TaskData):
     def set_action(self, action):
         self.action = action
         
-    def set_variables(self, variables=[]):
-        self.variables = variables
+    def set_arguments(self, arguments=[]):
+        self.arguments = arguments
         
     def set_initializer(self, initializer):
         self.initializer = initializer
@@ -146,8 +146,8 @@ class Task(TaskData):
     def get_action(self):
         return self.action        
         
-    def get_variables(self):
-        return self.variables
+    def get_arguments(self):
+        return self.arguments
     
     def get_initializer(self):
         return self.initializer        

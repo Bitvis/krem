@@ -70,9 +70,9 @@ class TaskAction():
         target_function = None
         target_method = None 
         returncode = 1
-        var_dict = {}
-        var_list = []
-        taskVars = self.task.get_variables()
+        arg_dict = {}
+        arg_list = []
+        taskArgs = self.task.get_arguments()
         
         self.task.initialize()
 
@@ -81,18 +81,18 @@ class TaskAction():
         #'{0:20} {1}'.format(str(entry[0]), str(entry[1])) + '\n'
         text_line = '{0:8}{1}{2}'.format(self.task.get_full_run_nr(), cc.WHITE, self.task.get_task_name())
         text_line += "  " + cc.YELLOW + self.task.get_target_function() + cc.RESET
-        text_line += "  " + cc.GRAY + str(self.task.get_variables()) + cc.RESET
+        text_line += "  " + cc.GRAY + str(self.task.get_arguments()) + cc.RESET
 
         self.log.write(text_line, 'info')
 
         self.task.get_logger().enable(self.task)
 
-        if len(taskVars) > 0:
-            for var in taskVars:
-                if isinstance(var, tuple) and len(var) == 2:
-                    var_dict[var[0]] = var[1]
-                elif not isinstance(var, list) and not isinstance(var, dict):
-                    var_list.append(var)
+        if len(taskArgs) > 0:
+            for arg in taskArgs:
+                if isinstance(arg, tuple) and len(arg) == 2:
+                    arg_dict[arg[0]] = arg[1]
+                elif not isinstance(arg, list) and not isinstance(arg, dict):
+                    arg_list.append(arg)
 
         try:
 
@@ -109,12 +109,12 @@ class TaskAction():
 
                 self.task.plugin_handler.entrypoints["pre_task_function_call"].execute({"task":self.task})
 
-                if len(var_dict) > 0 and len(var_list) > 0:
-                    returncode = target_function(task_data, var_list, **var_dict)
-                elif len(var_dict) > 0:
-                    returncode = target_function(task_data, **var_dict)
-                elif len(var_list) > 0:
-                    returncode = target_function(task_data, var_list)
+                if len(arg_dict) > 0 and len(arg_list) > 0:
+                    returncode = target_function(task_data, arg_list, **arg_dict)
+                elif len(arg_dict) > 0:
+                    returncode = target_function(task_data, **arg_dict)
+                elif len(arg_list) > 0:
+                    returncode = target_function(task_data, arg_list)
                 else:
                     returncode = target_function(task_data)
         

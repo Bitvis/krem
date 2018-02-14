@@ -20,29 +20,29 @@ if __name__ == '__main__':
 
     '''
     adding three tasks to be executed in sequence using job.run_task_serial:
-    <return code> = job.run_task_serial(<task>, <function>, [variables])
+    <return code> = job.run_task_serial(<task>, <function>, [arguments])
     '''
 
-    #executing function 'run_without_variables' in task 'example_task'
-    err = job.run_task_serial('task_foo', 'run_without_variables')
+    #executing function 'run_without_arguments' in task 'example_task'
+    err = job.run_task_serial('task_foo', 'run_without_arguments')
 
     if err == rc.PASS:
-        #executing a task function with a list of variables
-        err = job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
+        #executing a task function with a list of arguments
+        err = job.run_task_serial('task_foo', 'run_with_argument_list', arguments=["argument passed from job", "as list"])
 
         if err == rc.PASS:
-            #executing task function with named variables
-            err = job.run_task_serial('task_foo', 'run_with_named_variables', variables=[("var1", "var1_value"), ("var2", "var2_value")])
+            #executing task function with named arguments
+            err = job.run_task_serial('task_foo', 'run_with_named_arguments', arguments=[("arg1", "arg1_value"), ("arg2", "arg2_value")])
 
 
 
     '''
     adding two tasks to be executed in parallel using:
-    job.run_task_parallel(<task>, <function>, [variables])
+    job.run_task_parallel(<task>, <function>, [arguments])
     '''
-    #job.run_task_parallel(<task>, <function>, [variables])
-    job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run_in_parallel")])
-    job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run_in_parallel")])
+    #job.run_task_parallel(<task>, <function>, [arguments])
+    job.run_task_parallel('task_foo', 'run_with_named_arguments', arguments=[("arg1", ""), ("arg2", "run_in_parallel")])
+    job.run_task_parallel('task_foo', 'run_with_named_arguments', arguments=[("arg1", "also"), ("arg2", "run_in_parallel")])
 
     '''
     the below function will trigger execution of parallel tasks and it will return when all parallel tasks finish

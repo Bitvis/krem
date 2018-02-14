@@ -24,7 +24,7 @@
 ------------------------------------------------------------------
 ABOUT THIS MANUAL
 ------------------------------------------------------------------
-This manual covers KREM v1.4.0
+This manual covers KREM v2.0.0
 
 
 
@@ -136,17 +136,17 @@ TUTORIAL
 
 8. Job template explained
 	Now go back to the file 'job.py' in directory 'job_foo'.
-	The below line specifies that function 'run_without_variables' in task 'task_foo' will be run first.
+	The below line specifies that function 'run_without_arguments' in task 'task_foo' will be run first.
 
-	    err = job.run_task_serial('task_foo', 'run_without_variables')
+	    err = job.run_task_serial('task_foo', 'run_without_arguments')
 
 	If the above task passes, the below task will be executed. In this case a list is passed to the task function.
 
-	    err = job.run_task_serial('task_foo', 'run_with_variable_list', variables=["variable passed from job", "as list"])
+	    err = job.run_task_serial('task_foo', 'run_with_argument_list', arguments=["argument passed from job", "as list"])
 
-	It is also possible to pass named variables to a task function as shown below
+	It is also possible to pass named arguments to a task function as shown below
 
-	    err = job.run_task_serial('task_foo', 'run_with_named_variables', variables=[("var1", "var1_value"), ("var2", "var2_value")])
+	    err = job.run_task_serial('task_foo', 'run_with_named_arguments', arguments=[("arg1", "arg1_value"), ("arg2", "arg2_value")])
 
 
 	The template job file also includes parallel task execution.
@@ -154,8 +154,8 @@ TUTORIAL
     Then, call 'job.wait_for_complete()' to trigger parallel execution. 'job.wait_for_complete()' will return once all of the above tasks
     finish and return.
 
-        job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", ""), ("var2", "run_in_parallel")])
-        job.run_task_parallel('task_foo', 'run_with_named_variables', variables=[("var1", "also"), ("var2", "run_in_parallel")])
+        job.run_task_parallel('task_foo', 'run_with_named_arguments', arguments=[("arg1", ""), ("arg2", "run_in_parallel")])
+        job.run_task_parallel('task_foo', 'run_with_named_arguments', arguments=[("arg1", "also"), ("arg2", "run_in_parallel")])
 
         job.wait_for_complete() # Wait until parallel tasks are complete, and return result
 
@@ -190,11 +190,11 @@ TUTORIAL
 	$ cd latest
 	$ ls -l
 
-	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 1_1_task_foo_run_without_variables
-	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 2_1_task_foo_run_with_variable_list
-	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 3_1_task_foo_run_with_named_variables
-	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 4_1_task_foo_run_with_named_variables
-	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 4_2_task_foo_run_with_named_variables
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 1_1_task_foo_run_without_arguments
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 2_1_task_foo_run_with_argument_list
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 3_1_task_foo_run_with_named_arguments
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 4_1_task_foo_run_with_named_arguments
+	drwxrwxr-x 2 mk mk 4096 feb.   9 14:45 4_2_task_foo_run_with_named_arguments
 	-rw-rw-r-- 1 mk mk  407 feb.   9 14:45 execution.log
 	-rw-rw-r-- 1 mk mk  499 feb.   9 14:45 results
 	-rw-rw-r-- 1 mk mk 1035 feb.   9 14:45 tasks.log

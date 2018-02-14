@@ -6,9 +6,9 @@ from krempack.common import constants as c
 SIMPLE_TASK = "simple_task"
 SIMPLE_JOB = "simple_job"
 
-test_var_list = ["foo", "bar"]
-test_var_1 = "foo"
-test_var_2 = "bar"
+test_arg_list = ["foo", "bar"]
+test_arg_1 = "foo"
+test_arg_2 = "bar"
 
 #Regex
 LIST_ID_REGEX = '\[\d+\]'

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     job.config.job_logger.set_log_level('debug')
 
 
-    # <return_code> = job.run_task_serial(<task>, <function>, [variables])
+    # <return_code> = job.run_task_serial(<task>, <function>, [arguments])
     err = job.run_task_serial('test_syntax_error_task', 'run_with_syntax_error')
     
     # Finalize job

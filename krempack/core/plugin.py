@@ -100,8 +100,8 @@ class Entrypoint():
                 
                 
     ##Execute all plugin functions using this entrypoint in order
-    #@param variables : Dict of variables passed to plugin function
-    def execute(self, variables={}):
+    #@param arguments : Dict of arguments passed to plugin function
+    def execute(self, arguments={}):
         all_ok = True
         for list in self.call_list:
             list = self.call_list[list]
@@ -111,8 +111,8 @@ class Entrypoint():
                         plugin = plugin()     
                         if hasattr(plugin, self.name):
                             plugin_function = getattr(plugin, self.name)
-                            if variables is not None and len(variables) > 0:
-                                plugin_function(**variables)
+                            if arguments is not None and len(arguments) > 0:
+                                plugin_function(**arguments)
                             else:
                                 plugin_function()
                     except Exception as e:
