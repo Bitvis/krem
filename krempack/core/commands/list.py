@@ -39,6 +39,8 @@ from krempack.common import constants as c
 def list_jobs():
     jobs_path = os.path.abspath(kremtree.find_common_dir(c.PROJECT_JOBS_DIR))
     job_list = kremtree.list_dir(jobs_path)
+    job_list.sort()
+
     print("\nAvailable jobs: \n")
     print("[nr]\tname\n")
     idx = 0
@@ -53,6 +55,7 @@ def list_tasks():
     if tasks_path is not None:
         tasks_path = os.path.abspath(tasks_path)
         tasks_list = kremtree.list_dir(tasks_path)
+        tasks_list.sort()
 
         print("\nAvailable tasks:\n")
         print("[nr]\tname\n")

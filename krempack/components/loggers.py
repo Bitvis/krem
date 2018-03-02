@@ -62,6 +62,7 @@ class Logger:
     
     ## Write to log file
     def write_to_log(self, text):
+        text += "\n"
         try:
             f = open(self.log_file_path, 'a')
             if hasattr(text, "__iter__"):

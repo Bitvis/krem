@@ -10,7 +10,9 @@ def run(task, path):
     path = os.path.abspath(path)
     result = rc.PASS
     # Init test project    
-    shell_return = f.shell_run("krem " + p.CMD_INIT + " " + p.CMD_INIT_OPTION_PROJECT + " " + path)
+    shell_return = f.shell_run(p.KREM_CMD + p.CMD_INIT + " " + p.CMD_INIT_OPTION_PROJECT + " " + path)
+
+    print(path)
     if shell_return[0] != 0:
         result = rc.FAIL
     

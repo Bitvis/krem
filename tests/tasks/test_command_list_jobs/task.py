@@ -17,8 +17,8 @@ def run(task):
     listed_jobs = []
     missing_from_list = []
     missing_from_jobs_dir = []
-    
-    shell_return = f.shell_run("krem list " + p.CMD_LIST_OPTION_JOB)
+
+    shell_return = f.shell_run(p.KREM_CMD + "list " + p.CMD_LIST_OPTION_JOB)
     if shell_return[0] != 0:
         result = rc.FAIL
     

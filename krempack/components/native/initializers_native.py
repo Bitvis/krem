@@ -40,6 +40,7 @@ from krempack.common import kremtree
 import difflib
 import string
 import re
+import platform
 
 #######################################
 #   Default job initializer. Sets up
@@ -131,9 +132,11 @@ class JobInitializerNative(initializers.JobInitializer):
         if (dirCount > 0):
             latestDir = dirs[len(dirs)-1]
             #create link to latest dir
-            if os.path.islink(latestLinkPath):
-                os.remove(latestLinkPath)
-            os.symlink(latestDir, latestLinkPath)
+            #links are not supported on Linux
+            if platform.system() == 'Linux':
+                if os.path.islink(latestLinkPath):
+                    os.remove(latestLinkPath)
+                os.symlink(latestDir, latestLinkPath)
         
         return;
 

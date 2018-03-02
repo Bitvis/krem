@@ -6,6 +6,7 @@ from distutils.dir_util import copy_tree
 from library.returncodes import *
 from library.testlib import parameters as p
 from library.testlib import functions as f
+import platform
 
 this_file_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -83,7 +84,7 @@ def execute_with_target_setup(path, target):
 
     # execute job
     if not result:
-        shell_return = f.shell_run("krem run -j " + "test_plugin_job")
+        shell_return = f.shell_run(p.KREM_CMD + "run -j " + "test_plugin_job")
         if shell_return[0] != 0:
             result = rc.FAIL
 
@@ -96,16 +97,19 @@ def execute_with_target_setup(path, target):
 
     return(result)
 
-def test_all_entrypoints(task, path):
+def test_all_hooks(task, path):
     start_directory = os.getcwd()
 
-    result = execute_with_target_setup(path, "setup_test_all_entrypoints.py")
+    result = execute_with_target_setup(path, "setup_test_all_hooks.py")
     if not result:
         if not os.path.isfile(os.path.join("output", "job_start")):
             print("Plugin failed to create file: " + "job_start")
             result = rc.FAIL
         if not os.path.isfile(os.path.join("output", "pre_task_execution")):
             print("Plugin failed to create file: " + "pre_task_execution")
+            result = rc.FAIL
+        if not os.path.isfile(os.path.join("output", "job_progress_text")):
+            print("Plugin failed to create file: " + "job_progress_text")
             result = rc.FAIL
         if not os.path.isfile(os.path.join("output", "pre_task_function_call")):
             print("Plugin failed to create file: " + "pre_task_function_call")
@@ -133,8 +137,7 @@ def test_call_order(task, path):
             result = rc.FAIL
         else:
             print("Call order verified")
-        f.shell_run("cat output/test_plugin_job/latest/1_test_plugin_task__run__test_func_1/task.log")
-    
+
     os.chdir(start_directory)
     print("Changed directory to " + str(start_directory))
     return result

@@ -26,12 +26,13 @@
 env_file=$HOME'/.bashrc'
 cd $(dirname "$0") 
 krem_path=${PWD}
+krempack_path=${PWD}/krempack
 
 
 cd - >/dev/null
 
-krem_env="export PATH=${krem_path}:"'$PATH'
-krem_utils_env="export PYTHONPATH=${krem_path}:"'$PYTHONPATH'
+krem_env="export PATH=\"${krem_path}\":"'$PATH'
+krem_utils_env="export PYTHONPATH=\"${krem_path}\":\"${krempack_path}\":"'$PYTHONPATH'
 
 echo
 

@@ -63,7 +63,7 @@ class Executor():
 
     def wait_until_all_complete(self):
         '''
-        the pipeThe queue implementation in multiprocessing that allows data to be transferred between processes relies on standard OS pipes.
+        The queue implementation in multiprocessing that allows data to be transferred between processes relies on standard OS pipes.
         OS pipes are not infinitely long, so the process which queues data could be blocked in the OS during the put() operation until some other process uses get() to retrieve data from the queue.
         For small amounts of data, the main process can join() all the spawned subprocesses and then pick up the data. This often works well, but does not scale, and it is not clear when it will break.
         But it will certainly break with large amounts of data. The subprocess will be blocked in put() waiting for the main process to remove some data from the queue with get(), but the main process is blocked in join() waiting for the subprocess to finish. This results in a deadlock.

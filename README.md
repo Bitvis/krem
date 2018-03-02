@@ -5,19 +5,23 @@
 
 **KREM** is written in Python, but can execute scripts and programs written in any language.
 
-We are continuously improving **KREM**. We want to keep **KREM** lightweight and compact as possible, but allow to extend functionality through a plugin interface.
+We are continuously improving **KREM**. We want to keep **KREM** as lightweight and compact as possible, at the same time allowing extended functionality through a plugin interface.
 
 We will provide some plugins, but anyone is more than welcome to contribute.
 Plugins can be found here: https://github.com/Bitvis/krem_plugins.git
 
+<font color=green>KREM support Python 2.7 and 3.6 in Linux.</font>
+<p><font color=green>KREM in Windows is supported in Git Bash and Cygwin.</font>
 
-##### Support python 2.7 and 3.6
+
+Please see the User Manual for more information
+<font color=red> docs/KREM_USER_MANUAL.md </font>
+
 
 --------------------------------------------------------
 
 
 ## Quick start guide
-(Please see the MANUAL for more information and a simple tutorial)
 
 #### get KREM
 ```

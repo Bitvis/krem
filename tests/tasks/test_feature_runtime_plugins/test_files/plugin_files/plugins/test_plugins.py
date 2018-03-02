@@ -13,8 +13,8 @@ def write_output_file(file, input):
     print("File written: " + str(file))
 
 
-class TestPluginAllEntrypoints(plugin.Plugin):
-    name = "Test-plugin-entrypoints"
+class TestPluginAllHooks(plugin.Plugin):
+    name = "Test-plugin-hooks"
 
     def __init__(self):
         None
@@ -36,6 +36,14 @@ class TestPluginAllEntrypoints(plugin.Plugin):
         except Exception as e:
             pass
 
+    def job_progress_text(self, task, progress_text):
+        try:
+            #the first line is to check that we get the task object and not just task name
+            task.get_run_name()
+            #there should be at least 3 elements in the progress_text list
+            write_output_file("job_progress_text", progress_text[2])
+        except Exception as e:
+            pass
 
     def pre_task_function_call(self, task):
         try:
@@ -44,7 +52,6 @@ class TestPluginAllEntrypoints(plugin.Plugin):
             write_output_file("pre_task_function_call", "test_line")
         except Exception as e:
             pass
-
 
     def post_task_function_call(self, task):
         try:

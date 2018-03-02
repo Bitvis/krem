@@ -12,7 +12,7 @@ def run(task):
     temp_job_path = os.path.join(p.TEST_PROJECT_JOBS_DIR, p.TEMP_JOB_NAME)
     
     # Init job    
-    shell_return = f.shell_run("krem " + p.CMD_INIT + " " + p.CMD_INIT_OPTION_JOB + " " + p.TEMP_JOB_NAME)
+    shell_return = f.shell_run(p.KREM_CMD + p.CMD_INIT + " " + p.CMD_INIT_OPTION_JOB + " " + p.TEMP_JOB_NAME)
     if shell_return[0] != 0:
         result = rc.FAIL
     else: 

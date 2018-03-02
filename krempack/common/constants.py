@@ -63,4 +63,4 @@ TASK_LOG = "task.log"
 INFO_FILE = "info"
 
 # Plugin info
-plugin_entry_points = ["pre_job_start", "job_start", "pre_task_execution", "pre_task_function_call", "post_task_function_call", "post_task_execution", "job_end"]
+plugin_hooks = ["pre_job_start", "job_start", "pre_task_execution", "job_progress_text", "pre_task_function_call", "post_task_function_call", "post_task_execution", "job_end"]

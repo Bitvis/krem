@@ -72,27 +72,36 @@ class TaskAction():
         returncode = 1
         arg_dict = {}
         arg_list = []
+        arg_single = None
         taskArgs = self.task.get_arguments()
         
         self.task.initialize()
 
         module = self.import_task_module()
 
-        #'{0:20} {1}'.format(str(entry[0]), str(entry[1])) + '\n'
-        text_line = '{0:8}{1}{2}'.format(self.task.get_full_run_nr(), cc.WHITE, self.task.get_task_name())
-        text_line += "  " + cc.YELLOW + self.task.get_target_function() + cc.RESET
-        text_line += "  " + cc.GRAY + str(self.task.get_arguments()) + cc.RESET
+        progress = []
+        progress.append('{0:8}{1}{2}'.format(self.task.get_full_run_nr(), cc.WHITE, self.task.get_task_name()))
+        progress.append("  " + cc.YELLOW + self.task.get_target_function() + cc.RESET)
+        progress.append("  " + cc.GRAY + str(self.task.get_arguments()) + cc.RESET)
 
-        self.log.write(text_line, 'info')
+        #this hook will allow plugins to modify progress text
+        self.task.plugin_handler.hooks["job_progress_text"].execute({"task": self.task, "progress_text": progress})
+
+        self.log.write(" ".join(progress), 'info')
 
         self.task.get_logger().enable(self.task)
 
         if len(taskArgs) > 0:
-            for arg in taskArgs:
-                if isinstance(arg, tuple) and len(arg) == 2:
-                    arg_dict[arg[0]] = arg[1]
-                elif not isinstance(arg, list) and not isinstance(arg, dict):
-                    arg_list.append(arg)
+            if type(taskArgs) == dict:
+                arg_dict = taskArgs
+            if type(taskArgs) is not list:
+               arg_single = taskArgs
+            else:
+                for arg in taskArgs:
+                    if isinstance(arg, tuple) and len(arg) == 2:
+                        arg_dict[arg[0]] = arg[1]
+                    elif not isinstance(arg, list) and not isinstance(arg, dict):
+                        arg_list.append(arg)
 
         try:
 
@@ -104,22 +113,24 @@ class TaskAction():
                 task_data.set_task_name(self.task.get_task_name())
                 task_data.set_run_name(self.task.get_run_name())
                 task_data.set_run_nr(self.task.get_run_nr())
+                task_data.set_full_run_nr(self.task.get_full_run_nr())
                 task_data.set_job_path(self.task.get_job_path())
                 task_data.set_output_path(self.task.get_output_path())
 
-                self.task.plugin_handler.entrypoints["pre_task_function_call"].execute({"task":self.task})
+                self.task.plugin_handler.hooks["pre_task_function_call"].execute({"task":self.task})
 
-                if len(arg_dict) > 0 and len(arg_list) > 0:
-                    returncode = target_function(task_data, arg_list, **arg_dict)
-                elif len(arg_dict) > 0:
+                if len(arg_dict) > 0:
                     returncode = target_function(task_data, **arg_dict)
                 elif len(arg_list) > 0:
                     returncode = target_function(task_data, arg_list)
+                elif arg_single is not None:
+                    returncode = target_function(task_data, arg_single)
                 else:
                     returncode = target_function(task_data)
+
         
                 self.task.set_task_result(returncode)            
-                self.task.plugin_handler.entrypoints["post_task_function_call"].execute({"task":self.task})
+                self.task.plugin_handler.hooks["post_task_function_call"].execute({"task":self.task})
 
                 self.task.get_logger().disable(self.task)
 

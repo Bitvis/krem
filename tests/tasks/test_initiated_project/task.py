@@ -21,7 +21,7 @@ def run(task, path):
         
     if not result:
         print("Changed directory to " + str(path))
-        shell_return = f.shell_run("krem " + p.CMD_RUN + " " + p.CMD_RUN_OPTION_JOB + " " + p.SIMPLE_JOB) 
+        shell_return = f.shell_run(p.KREM_CMD +  p.CMD_RUN + " " + p.CMD_RUN_OPTION_JOB + " " + p.SIMPLE_JOB)
         if shell_return[0] != 0:
             result = rc.FAIL   
 

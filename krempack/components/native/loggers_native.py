@@ -63,7 +63,7 @@ class JobLoggerNative(loggers.JobLogger):
 
             log_text = self.strip_coloring(log_text)
 
-            self.write_to_log(log_text + '\n')
+            self.write_to_log(log_text)
         return
 
     ## Applies formatting of log entry
@@ -76,7 +76,7 @@ class JobLoggerNative(loggers.JobLogger):
         nLevel = 0
         nLog_level = 0
         for c, l in enumerate(self.log_levels, 1):
-            if level is l:
+            if level == l:
                 nLevel = c
             if self.log_level is l:
                 nLog_level = c
@@ -177,7 +177,8 @@ class TaskWriter:
     
     ## Replaces print-function in tasks
     def write(self, text):
-        logfile = open(self.output_file, "a", os.O_NONBLOCK)
+        #for real files O_NONBLOCK has no effect so we change from O_NONBLOCK to O_WRONLY
+        logfile = open(self.output_file, "a", os.O_WRONLY)
         for line in text.splitlines():
             if line and line.strip():
                 logfile.write(self.tag + "  ")
@@ -200,7 +201,7 @@ class TaskLoggerNative(loggers.TaskLogger):
     ## Activate logger by redirecting stdout to TaskWriter
     def enable(self, task):
 
-        logfile = open(self.log_file_path, "a", os.O_NONBLOCK)
+        logfile = open(self.log_file_path, "a", os.O_WRONLY)
         sys.stdout = logfile
         sys.stderr = logfile
         print("\n" + task.get_full_run_nr() + "  *** Task start: " + "  " + task.get_task_name() + "  " + task.get_target_function() + " ***\n")
@@ -212,7 +213,7 @@ class TaskLoggerNative(loggers.TaskLogger):
         
     ## Disables logger and restores default stdout
     def disable(self, task):
-        logfile = open(self.log_file_path, "a", os.O_NONBLOCK)
+        logfile = open(self.log_file_path, "a", os.O_WRONLY)
         sys.stdout = logfile
         sys.stderr = logfile
         print("\n" + task.get_full_run_nr() + "  *** Task end: " + str(task.task_name) + " ***\n")

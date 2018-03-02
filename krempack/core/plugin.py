@@ -38,7 +38,7 @@ class Plugin():
     __metaclass__ = ABCMeta
     
     ## Constructor
-    #  : Must setup self.call_list={"<entrypoint>":<function>}
+    #  : Must setup self.call_list={"<hook>":<function>}
     def __init__(self):
         pass
     
@@ -48,14 +48,14 @@ class Plugin():
         pass
         
         
-## Entrypoint class
+## Hook class
 #
-# Contains execution information required for all entrypoints
-class Entrypoint():
+# Contains execution information required for all hooks
+class Hook():
 
     ## Constructor
     # : Setup call list dictionary sections based on execution order
-    # @param name : Name of entrypoint
+    # @param name : Name of hook
     def __init__(self, name):
         self.name = name
         self.call_list=OrderedDict()
@@ -78,7 +78,7 @@ class Entrypoint():
     def append_last_to_execute(self, plugin):
         self.call_list["last"].append(plugin)
     
-    ##Removes plugin function from entrypoint call list
+    ##Removes plugin function from hook call list
     # @param function : Class Plugin
     def remove_from_call_list(self, plugin):
         for list in self.call_list:
@@ -86,7 +86,7 @@ class Entrypoint():
             if plugin in list:                
                 list.remove(plugin)
         
-    ##'random' section of call list first contains all plugins using this entrypoint.
+    ##'random' section of call list first contains all plugins using this hook.
     #This function cleans up 'random' section after plugin functions have been added
     #to sections to execute last or first
     def synch_call_lists(self):
@@ -99,7 +99,7 @@ class Entrypoint():
             self.call_list["dont_care"].remove(plugin)
                 
                 
-    ##Execute all plugin functions using this entrypoint in order
+    ##Execute all plugin functions using this hook in order
     #@param arguments : Dict of arguments passed to plugin function
     def execute(self, arguments={}):
         all_ok = True
@@ -116,7 +116,7 @@ class Entrypoint():
                             else:
                                 plugin_function()
                     except Exception as e:
-                        print('[ERROR]: In plugin: "' + str(plugin.name) + '" , entrypoint: "' + str(self.name) + '"')
+                        print('[ERROR]: In plugin: "' + str(plugin.name) + '" , hook: "' + str(self.name) + '"')
                         print(str(e))
                         all_ok = False
                               
@@ -126,14 +126,14 @@ class Entrypoint():
 #
 # Register and execute plugins
 class PluginHandler():
-    entrypoints = OrderedDict()
-    plugin_list = []
     
     ## Constructor
-    #  : Initiates available entrypoints
+    #  : Initiates available hooks
     def __init__(self):
-        for entrypoint in c.plugin_entry_points:
-            self.entrypoints[entrypoint] = Entrypoint(entrypoint)
+        self.hooks = OrderedDict()
+        self.plugin_list = []
+        for hook in c.plugin_hooks:
+            self.hooks[hook] = Hook(hook)
     
     ##Register new plugins
     # @param plugin : Class Plugin
@@ -142,12 +142,12 @@ class PluginHandler():
         if self.verify_plugin(plugin):
             self.plugin_list.append(plugin)
 
-            for entrypoint in c.plugin_entry_points:
-                if hasattr(plugin, entrypoint):
+            for hook in c.plugin_hooks:
+                if hasattr(plugin, hook):
                     try:
-                        self.entrypoints[entrypoint].append_call_list(plugin)
+                        self.hooks[hook].append_call_list(plugin)
                     except Exception:
-                        print('[ERROR]: Failed to register plugin: "' + str(plugin.name) + '", function for entrypoint: "' + str(entrypoint) + '"')
+                        print('[ERROR]: Failed to register plugin: "' + str(plugin.name) + '", function for hook: "' + str(hook) + '"')
                         all_ok = False
                         self.unregister_plugin(plugin)
         else:
@@ -161,12 +161,12 @@ class PluginHandler():
     def unregister_plugin(self, plugin):
         all_ok = True
 
-        for entrypoint in c.plugin_entry_points:
-            if hasattr(plugin, entrypoiny):
+        for hook in c.plugin_hooks:
+            if hasattr(plugin, hooks):
                 try:
-                    self.entrypoints[entrypoint].remove_from_call_list(plugin)
+                    self.hooks[hook].remove_from_call_list(plugin)
                 except Exception:
-                    print('[ERROR]: Failed to unregister plugin: "' + str(plugin.name) + '", function for entrypoint: "' + str(entrypoint) + '"')
+                    print('[ERROR]: Failed to unregister plugin: "' + str(plugin.name) + '", function for hook: "' + str(hook) + '"')
                     all_ok = False
         return all_ok
     
@@ -222,5 +222,5 @@ if __name__ == '__main__':
     plugin_handler.register_plugin(TestPlugin)
     plugin_handler.register_plugin(TestPlugin2)
     plugin_handler.unregister_plugin(TestPlugin)
-    plugin_handler.entrypoints["pre-job_execution"].execute({"test":"This is a test"})
+    plugin_handler.hooks["pre-job_execution"].execute({"test":"This is a test"})
     '''

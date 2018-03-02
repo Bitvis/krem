@@ -63,7 +63,7 @@ def run_with_syntax_error(task, path):
 
     if not result:
         print("Changed directory to " + str(path))
-        shell_return = f.shell_run("krem " + p.CMD_RUN + " " + p.CMD_RUN_OPTION_JOB + " " + "test_syntax_error_job")
+        shell_return = f.shell_run(p.KREM_CMD +  p.CMD_RUN + " " + p.CMD_RUN_OPTION_JOB + " " + "test_syntax_error_job")
 
         #we expect the above command to fail since we are running a job with a task with syntax error
         #so failed job means that this test pass

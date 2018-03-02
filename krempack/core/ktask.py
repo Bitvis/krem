@@ -147,7 +147,11 @@ class Task(TaskData):
         return self.action        
         
     def get_arguments(self):
-        return self.arguments
+        if len(self.arguments) is not 0:
+            return self.arguments
+        else:
+            return ""
+
     
     def get_initializer(self):
         return self.initializer        

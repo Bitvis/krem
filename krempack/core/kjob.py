@@ -76,8 +76,8 @@ class Job():
 
         
     def start(self): 
-        for entrypoint in c.plugin_entry_points:
-            self.plugin_handler.entrypoints[entrypoint].synch_call_lists()
+        for hook in c.plugin_hooks:
+            self.plugin_handler.hooks[hook].synch_call_lists()
 
         
         initializer = self.config.get_job_initializer()
@@ -100,7 +100,7 @@ class Job():
         
         self.log = self.config.get_job_logger()
 
-        self.plugin_handler.entrypoints["job_start"].execute({"job": self})
+        self.plugin_handler.hooks["job_start"].execute({"job": self})
        
     # Load configuration object
     # Must not just set the new config object, as user has most likely not 
@@ -197,7 +197,7 @@ class Job():
         
         for task in self.task_list:
             if task.get_run_nr() == self.task_run_nr:
-                self.plugin_handler.entrypoints["post_task_execution"].execute({"task":task, "job":self})
+                self.plugin_handler.hooks["post_task_execution"].execute({"task":task, "job":self})
         self.task_run_nr = self.task_run_nr + 1
 
         return task_results
@@ -213,7 +213,7 @@ class Job():
             task = self.task_list[self.task_list_index]
 
             if self.executor.is_ready():
-                self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
+                self.plugin_handler.hooks["pre_task_execution"].execute({"task":task, "job":self})
                 self.executor.execute(task)
                 task_results = self.wait_for_complete()
                 ret = task_results[0]
@@ -234,7 +234,7 @@ class Job():
         if not error:
             self.add_task(task_name, function, arguments=arguments, task_logger=task_logger, task_initializer=task_initializer)
             task = self.task_list[self.task_list_index]
-            self.plugin_handler.entrypoints["pre_task_execution"].execute({"task":task, "job":self})
+            self.plugin_handler.hooks["pre_task_execution"].execute({"task":task, "job":self})
             self.executor.execute(task)
         else:
             self.add_invalid_task(task_name)
@@ -277,4 +277,4 @@ class Job():
 
     def end(self):
         self.compile_results()
-        self.plugin_handler.entrypoints["job_end"].execute({"job":self})
+        self.plugin_handler.hooks["job_end"].execute({"job":self})

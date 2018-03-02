@@ -9,6 +9,7 @@ SIMPLE_JOB = "simple_job"
 test_arg_list = ["foo", "bar"]
 test_arg_1 = "foo"
 test_arg_2 = "bar"
+test_arg_dict = {'a': 1, 'b': 2, 'c': 3}
 
 #Regex
 LIST_ID_REGEX = '\[\d+\]'
@@ -19,6 +20,10 @@ TIMESTAMP_REGEX = '^\d+_\d+'
 TEST_PROJECT_LIBRARY_PATH = os.path.dirname(os.path.realpath(__file__))
 
 TEST_PROJECT_ROOT_PATH = os.path.realpath(os.path.join(TEST_PROJECT_LIBRARY_PATH, "..",".."))
+
+KREM_PATH = os.path.realpath(os.path.join(TEST_PROJECT_ROOT_PATH, ".."))
+
+KREM_CMD = "python " + KREM_PATH + "/krem "
 
 CONFIG_DIR_NAME = "config"
 LIBRARY_DIR_NAME = "library"

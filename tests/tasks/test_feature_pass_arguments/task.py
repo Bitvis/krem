@@ -5,6 +5,25 @@ from library.returncodes import *
 from library.testlib import parameters as p
 
 
+def run_argument_single(task, test_arg):
+    result = rc.UNSTABLE
+    print("Expected argument: " + str(p.test_arg_1))
+    print("arguments passed from job to task: " + str(test_arg))
+
+    if test_arg is None:
+        print("ERROR: No arguments passed from job to task")
+        result = rc.FAIL
+    elif test_arg != p.test_arg_1:
+        print("ERROR: argument list passed from job to task is not as expected")
+        result = rc.FAIL
+    else:
+        print("argument list passed from job to task OK")
+        result = rc.PASS
+
+    return result
+
+
+
 def run_argument_list(task, test_arg_list):
 
     result = rc.UNSTABLE
@@ -53,3 +72,21 @@ def run_named_arguments(task, test_arg_1, test_arg_2):
         result = rc.PASS
         
     return result
+
+
+def run_with_argument_dict(task, **args):
+
+    print ("executing function 'run_with_argument_dict'")
+
+    result = rc.FAIL
+    if type(args) is dict:
+        if args == p.test_arg_dict:
+            print("arguments passed from job to task OK")
+            print(str(args))
+            result = rc.PASS
+
+    if result == rc.FAIL:
+        print("ERROR: expected dictionary")
+
+
+    return(result)

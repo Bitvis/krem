@@ -18,7 +18,7 @@ def run(task):
     missing_from_list = []
     missing_from_tasks_dir = []
     
-    shell_return = f.shell_run("krem list " + p.CMD_LIST_OPTION_TASK)
+    shell_return = f.shell_run(p.KREM_CMD + p.CMD_LIST + " " + p.CMD_LIST_OPTION_TASK)
     if shell_return[0] != 0:
         result = rc.FAIL
     
