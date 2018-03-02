@@ -3,6 +3,14 @@
 
 -----------------------------------------
 
+### v2.1.1
+----------
+
+Released: 2018-03-02
+
+* **bugfix:** running a job based on job number did not always result in running the requested job
+
+
 ### v2.1.0
 ----------
 

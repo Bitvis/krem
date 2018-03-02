@@ -58,6 +58,7 @@ def run_job(target):
     
     if not job_num < 0:
         jobs = kremtree.list_dir(jobs_path)
+        jobs.sort()
         if not job_num + 1 > len(jobs):
             for job in jobs:
                 if idx == job_num:
