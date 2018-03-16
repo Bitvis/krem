@@ -900,9 +900,9 @@ to the return statement as shown in [Variables from serial tasks](#variables-fro
 To receive variables from tasks executed in parallel do as follows:
 
 ```python
-job.run_task_parallel('test_vars_from_job_to_task', 'return_single_variable')
-job.run_task_parallel('test_vars_from_job_to_task', 'return_list_variable')
-job.run_task_parallel('test_vars_from_job_to_task', 'return_object')
+job.run_task_parallel('task_foo', 'return_single_variable')
+job.run_task_parallel('task_foo', 'return_list_variable')
+job.run_task_parallel('task_foo', 'return_object')
 
 return_codes, return_vars = job.wait_for_complete()
 

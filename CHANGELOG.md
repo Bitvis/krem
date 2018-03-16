@@ -3,12 +3,22 @@
 
 -----------------------------------------
 
+### v2.2.1
+----------
+
+Released: 2018-03-16
+
+* Added feature to return variables from tasks to job, not only return code.   (this feature was already present in v2.2.0, but was not mentioned in the changelog)
+* renamed selftest case _test_vars_from_job_to_task_ to _test_vars_from_task_to_job_
+
+
 ### v2.2.0
 ----------
 
 Released: 2018-03-16
 
 * Added CLI plugin interface.
+* Added feature to return variables from tasks to job, not only return code
 * _setup.sh_ migrated to _install.py_.
 * Added variable _plugin\_data_ to _Task()_ class. Use it for passing data between hook functions within a plugin.
 * Updated _KREM\_USER\_MANUAL.md_ according to the changes above.

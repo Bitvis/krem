@@ -30,25 +30,25 @@ if __name__ == '__main__':
     job.run_task_serial('test_feature_pass_arguments', 'run_with_argument_float', arguments=p.test_arg_float)
 
 
-    ret, var = job.run_task_serial('test_vars_from_job_to_task', 'return_single_variable')
-    job.run_task_serial('test_vars_from_job_to_task', 'check_vars', arguments=[('test', 'return_single_variable'), ('var_ret', ret), ('var', var)])
+    ret, var = job.run_task_serial('test_vars_from_task_to_job', 'return_single_variable')
+    job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_single_variable'), ('var_ret', ret), ('var', var)])
 
-    ret, var = job.run_task_serial('test_vars_from_job_to_task', 'return_list_variable')
-    job.run_task_serial('test_vars_from_job_to_task', 'check_vars', arguments=[('test', 'return_list_variable'), ('var_ret', ret), ('var', var)])
+    ret, var = job.run_task_serial('test_vars_from_task_to_job', 'return_list_variable')
+    job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_list_variable'), ('var_ret', ret), ('var', var)])
 
-    ret, var = job.run_task_serial('test_vars_from_job_to_task', 'return_three_variables')
-    job.run_task_serial('test_vars_from_job_to_task', 'check_vars', arguments=[('test', 'return_three_variables'), ('var_ret', ret), ('var', var)])
+    ret, var = job.run_task_serial('test_vars_from_task_to_job', 'return_three_variables')
+    job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_three_variables'), ('var_ret', ret), ('var', var)])
 
     # fire off some parallel tasks
-    job.run_task_parallel('test_vars_from_job_to_task', 'return_single_variable')
-    job.run_task_parallel('test_vars_from_job_to_task', 'return_list_variable')
-    job.run_task_parallel('test_vars_from_job_to_task', 'return_object')
+    job.run_task_parallel('test_vars_from_task_to_job', 'return_single_variable')
+    job.run_task_parallel('test_vars_from_task_to_job', 'return_list_variable')
+    job.run_task_parallel('test_vars_from_task_to_job', 'return_object')
     return_codes, return_vars = job.wait_for_complete()
 
     # now test that the variables from the above parallel tasks are correct
-    job.run_task_serial('test_vars_from_job_to_task', 'check_vars', arguments=[('test', 'return_single_variable'), ('var_ret', ret), ('var', return_vars[0])])
-    job.run_task_serial('test_vars_from_job_to_task', 'check_vars', arguments=[('test', 'return_list_variable'), ('var_ret', ret), ('var', return_vars[1])])
-    job.run_task_serial('test_vars_from_job_to_task', 'check_vars', arguments=[('test', 'return_object'), ('var_ret', ret), ('var', return_vars[2])])
+    job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_single_variable'), ('var_ret', ret), ('var', return_vars[0])])
+    job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_list_variable'), ('var_ret', ret), ('var', return_vars[1])])
+    job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_object'), ('var_ret', ret), ('var', return_vars[2])])
 
 
     arg_list_rc = job.run_task_serial('test_feature_pass_arguments', 'run_argument_list', arguments=[p.test_arg_1, p.test_arg_2])
