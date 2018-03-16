@@ -31,7 +31,7 @@ git clone https://github.com/Bitvis/krem.git
 #### install KREM
 ```
 cd krem directory
-./setup.sh
+./install.py
 source ~/.bashrc
 ```
 

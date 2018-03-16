@@ -3,7 +3,7 @@
 ## \brief Job execution class
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -78,8 +78,13 @@ class Executor():
                 run_name, task = entry.popitem()
 
                 try:
+                    #get and set return code
                     self.tasksRunning[run_name].set_task_result(task.get_task_result())
-                except Exception as e:
+
+                    #get and set return variables
+                    self.tasksRunning[run_name].set_task_return_vars(task.get_task_return_vars())
+
+                except Exception:
                     self.log.write("Failed to retrieve task results", 'error')
                 still_running = still_running - 1
 

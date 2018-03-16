@@ -10,6 +10,8 @@ test_arg_list = ["foo", "bar"]
 test_arg_1 = "foo"
 test_arg_2 = "bar"
 test_arg_dict = {'a': 1, 'b': 2, 'c': 3}
+test_arg_int = 5
+test_arg_float = 6.5
 
 #Regex
 LIST_ID_REGEX = '\[\d+\]'

@@ -3,7 +3,7 @@
 ## \brief Interfaces to logger classes
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -45,7 +45,7 @@ class Logger:
     ## Set and create empty log file
     def set_log_file(self, path):
         self.log_file_path = os.path.abspath(path)
-        f = open(path, 'w')
+        f = open(self.log_file_path, 'w')
         f.close()
     
     ## Set name of log file

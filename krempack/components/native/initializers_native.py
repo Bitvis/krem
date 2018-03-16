@@ -3,7 +3,7 @@
 ## \brief Default implementation of Initializer classes 
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -54,7 +54,7 @@ class JobInitializerNative(initializers.JobInitializer):
     
     def execute(self, target):
         instance_output_name = self.time_stamp()
-        output_path = kremtree.find_common_dir(c.PROJECT_OUTPUT_DIR)
+        output_path = os.path.abspath(kremtree.find_common_dir(c.PROJECT_OUTPUT_DIR))
         job_output_path = os.path.join(output_path, target)
         instance_output_path = os.path.join(job_output_path, instance_output_name)
         
@@ -70,7 +70,7 @@ class JobInitializerNative(initializers.JobInitializer):
         try:
             os.mkdir(instance_output_path)
 
-        except Exception as e:
+        except Exception:
             print("[INTERNAL_ERROR]: Unable to create " + instance_output_path)
             exit(1)
           
@@ -84,15 +84,8 @@ class JobInitializerNative(initializers.JobInitializer):
         except:
             print("[INTERNAL_WARNING]: Unable to create file " + info_path)
             
-        # Add project path to syspath
-        projectPath = os.path.join(kremtree.find_krem_root('./'))
-        projectPath = os.path.realpath(projectPath)
-        sys.path.append(projectPath)
-            
-        
         self.rotateSubdirs( job_output_path, '\d+_\d+', c.PROJECT_KEEP_OUTPUT_DIRS )
         
-            
         return instance_output_path
         
     def time_stamp(self):
@@ -102,9 +95,7 @@ class JobInitializerNative(initializers.JobInitializer):
 
     def rotateSubdirs( self, path, pattern, keepDirs ):
         #remove oldest dirs for given job
-        
-        path = path + '/'
-        
+       
         allDirs = os.listdir(path)
       
         dirCount = 0
@@ -112,7 +103,7 @@ class JobInitializerNative(initializers.JobInitializer):
         
         #find all dirs matching pattern
         for subdir in allDirs:
-            if os.path.isdir(path + subdir):      
+            if os.path.isdir(os.path.join(path, subdir)):      
                 match = re.findall(pattern, subdir)
                 if match:
                     dirCount += 1
@@ -124,9 +115,15 @@ class JobInitializerNative(initializers.JobInitializer):
         #remove oldest dirs up to keepDirs
         while (dirCount > keepDirs):
             dirCount -= 1
-            shutil.rmtree(path + dirs[0])
+            shutil.rmtree(os.path.join(path, dirs[0]))
             del dirs[0]
-            
+       
+        try:  #Move up if current directory doesn't exist
+            os.getcwd()
+        except Exception:
+            os.chdir("..")
+
+     
         #set latest dir link
         latestLinkPath = os.path.join(path, 'latest')
         if (dirCount > 0):
@@ -138,7 +135,7 @@ class JobInitializerNative(initializers.JobInitializer):
                     os.remove(latestLinkPath)
                 os.symlink(latestDir, latestLinkPath)
         
-        return;
+        return
 
         
     

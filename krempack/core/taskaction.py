@@ -3,7 +3,7 @@
 ## \brief Default implementation of TaskAction class
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -66,9 +66,7 @@ class TaskAction():
 
     ## Executes target function to target task module
     def run_method(self, queue):
-        module_path = None
         target_function = None
-        target_method = None 
         returncode = 1
         arg_dict = {}
         arg_list = []
@@ -85,23 +83,29 @@ class TaskAction():
         progress.append("  " + cc.GRAY + str(self.task.get_arguments()) + cc.RESET)
 
         #this hook will allow plugins to modify progress text
-        self.task.plugin_handler.hooks["job_progress_text"].execute({"task": self.task, "progress_text": progress})
+        self.task.plugin_handler.execute_hook("job_progress_text", {"task": self.task, "progress_text": progress})
 
         self.log.write(" ".join(progress), 'info')
 
         self.task.get_logger().enable(self.task)
 
-        if len(taskArgs) > 0:
-            if type(taskArgs) == dict:
-                arg_dict = taskArgs
-            if type(taskArgs) is not list:
-               arg_single = taskArgs
-            else:
-                for arg in taskArgs:
-                    if isinstance(arg, tuple) and len(arg) == 2:
-                        arg_dict[arg[0]] = arg[1]
-                    elif not isinstance(arg, list) and not isinstance(arg, dict):
-                        arg_list.append(arg)
+        # we cannot check length of int and float so we check the type for those
+        # before we check for length
+        if type(taskArgs) == int or type(taskArgs) == float:
+            arg_single = taskArgs
+        else:
+
+            if len(taskArgs) > 0:
+                if type(taskArgs) == dict:
+                    arg_dict = taskArgs
+                if type(taskArgs) is not list:
+                   arg_single = taskArgs
+                else:
+                    for arg in taskArgs:
+                        if type(arg) == tuple and len(arg) == 2:
+                            arg_dict[arg[0]] = arg[1]
+                        elif not type(arg) == list and not type(arg) == dict:
+                            arg_list.append(arg)
 
         try:
 
@@ -117,27 +121,43 @@ class TaskAction():
                 task_data.set_job_path(self.task.get_job_path())
                 task_data.set_output_path(self.task.get_output_path())
 
-                self.task.plugin_handler.hooks["pre_task_function_call"].execute({"task":self.task})
-
-                if len(arg_dict) > 0:
-                    returncode = target_function(task_data, **arg_dict)
-                elif len(arg_list) > 0:
-                    returncode = target_function(task_data, arg_list)
-                elif arg_single is not None:
-                    returncode = target_function(task_data, arg_single)
+                if self.task.plugin_handler.execute_hook("pre_task_function_call", {"task":self.task}):
+                    print("Failing task")
+                    self.task.set_task_result(rc.FAIL)
                 else:
-                    returncode = target_function(task_data)
+                    if len(arg_dict) > 0:
+                        return_vars = target_function(task_data, **arg_dict)
+                    elif len(arg_list) > 0:
+                        return_vars = target_function(task_data, arg_list)
+                    elif arg_single is not None:
+                        return_vars = target_function(task_data, arg_single)
+                    else:
+                        return_vars = target_function(task_data)
 
-        
-                self.task.set_task_result(returncode)            
-                self.task.plugin_handler.hooks["post_task_function_call"].execute({"task":self.task})
+                    #split return code and return variables
+                    if type(return_vars) is tuple:
+                        return_vars_list = list(return_vars)
+                        return_code = return_vars_list[0]
+
+                        if len(return_vars_list) > 2:
+                            return_vars = tuple(return_vars_list[1:])
+                        else:
+                            return_vars = return_vars_list[1]
+                        self.task.set_task_return_vars(return_vars)
+                    else:
+                        return_code = return_vars
+
+                    self.task.set_task_result(return_code)
+
+                if self.task.plugin_handler.execute_hook("post_task_function_call", {"task":self.task}):
+                    self.task.set_task_result(rc.FAIL)
 
                 self.task.get_logger().disable(self.task)
 
-        except Exception as e:
+        except Exception:
             self.task.get_logger().disable(self.task)
 
-            exception_string = traceback.format_exc(-1)
+            exception_string = traceback.format_exc()
             self.log.write(exception_string, 'error')
 
             self.task.set_task_result(rc.EXCEPTION)
@@ -148,10 +168,8 @@ class TaskAction():
 
 
     def import_task_module(self):
-        path = None
         module = None
         module_name = None
-        function = None
 
         module_name = self.task.get_target_module_name()
         module_path = self.task.get_target_module_path()
@@ -162,8 +180,8 @@ class TaskAction():
 
             try:
                 module = import_module(module_name)
-            except Exception as e:
-                self.log.write(self.task.get_target_module_path() + "  " +str(e), 'error')
+            except Exception:
+                self.log.write(traceback.format_exc(-1), 'error')
                 exit(1)
 
 

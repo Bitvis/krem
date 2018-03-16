@@ -3,7 +3,7 @@
 
 from krempack.core import kjob
 from library.returncodes import *
-from library.setup import setup_plugins
+from library.setup import *
 
 if __name__ == '__main__':
     job = kjob.Job(__file__, rc)

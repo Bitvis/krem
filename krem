@@ -3,7 +3,7 @@
 ## \file krem
 ## \brief KREM main executable
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -31,17 +31,23 @@ import sys
 import os
 import subprocess
 
-KREM_VERSION = '2.1.1'
+from krempack.common import kremtree
+from krempack.core import plugin
+from krempack.core import cli_plugin
+
+KREM_VERSION = '2.2.0'
+
 
 # Each command is a script located in dir 'CMD_PATH'
 # New commands must have an executable script named 'krem.<cmd_name>',
 # and add <cmd_name> to <ACCEPTABLE_CMD>
 ACCEPTABLE_CMD = ['init', 'run', 'list'] # Add new commands here
 CMD_PATH = os.path.join(os.path.dirname(__file__), 'krempack', 'core', 'commands')
-
-
+plugin_handler = plugin.PluginHandler('cli')
+plugins_initialized = False
 def cmd_parser(args):
-    
+    global plugins_initialized
+    cmd_found = False
     if len(args) > 1:
         cmd = args[1]
     else:
@@ -49,29 +55,50 @@ def cmd_parser(args):
         exit(1)
     
     parsed_cmd = ['python']
-    
-    # Append command. 
+
+    # Parse command.
     if cmd in ACCEPTABLE_CMD:
         cmd_script = 'krem.' + cmd
         cmd_script_path = os.path.join(CMD_PATH,cmd_script)
         parsed_cmd.append(cmd_script_path)
-        
-        # Append arguments
-        if len(args) > 1:
-            num_additional_args = len(args) - 2
-            additional_args = args[-num_additional_args:]
-            parsed_cmd.extend(additional_args)
+        cmd_found = True
 
     elif cmd == '--help' or cmd == '-h':
         print_usage()
-        exit(0)            
-    else:
+        exit(0)
+
+    elif kremtree.find_krem_root(os.getcwd()):
+        # Check cli plugins for command
+        if not plugins_initialized:
+            plugins_initialized = cli_plugin.setup_cli_plugins(plugin_handler)
+
+        if plugins_initialized:
+            plugin_commands = get_cli_plugin_commands()
+            if len(plugin_commands) > 0:
+                if cmd in plugin_commands:
+                    parsed_cmd.append(plugin_commands[cmd])
+                    cmd_found = True
+
+    if not cmd_found:
         print('\nInvalid command\n')
         print_usage()
         exit(1)
+    elif len(args) > 1:
+        num_additional_args = len(args) - 2
+        additional_args = args[-num_additional_args:]
+        parsed_cmd.extend(additional_args)
+
         
     return parsed_cmd
-    
+
+def get_cli_plugin_commands():
+    commands = {}
+
+    plugin_handler.execute_hook("cli_commands", {"commands": commands})
+
+    return commands
+
+
 def print_info():
     print('')
     print('KREM v' + KREM_VERSION)
@@ -79,16 +106,31 @@ def print_info():
     print_usage()
 
 def print_usage():
+    global plugins_initialized
     print('Usage: krem <cmd>')
     print('Available commands:')
     for cmd in ACCEPTABLE_CMD:
         print('- ' + cmd)
+
+    if kremtree.find_krem_root(os.getcwd()):
+        if not plugins_initialized:
+            plugins_initialized = cli_plugin.setup_cli_plugins(plugin_handler)
+        if plugins_initialized:
+            plugin_commands = get_cli_plugin_commands()
+            if len(plugin_commands) > 0:
+                for cmd in plugin_commands:
+                    print('- ' + cmd)
     print('')
     print('for more information, execute: krem <cmd> --help')
     print('')
                  
 
 if __name__ == '__main__':
+    try: #Move up one dir if current dir doesn't exist
+        os.getcwd()
+    except Exception:
+        os.chdir("..")
+
     command = cmd_parser(sys.argv)
     ret = subprocess.call(command)
     exit(ret)

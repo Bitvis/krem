@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
 
     # <return_code> = job.run_task_serial(<task>, <function>, [arguments])
-    err = job.run_task_serial('test_plugin_task', 'test_func')
+    err = job.run_task_serial('test_task', 'test_func')
     
     # Finalize job
     job.end()

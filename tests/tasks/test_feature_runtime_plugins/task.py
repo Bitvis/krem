@@ -10,14 +10,16 @@ import platform
 
 this_file_path = os.path.dirname(os.path.realpath(__file__))
 
-test_task_path = os.path.join(this_file_path, "test_files", "test_plugin_task")
-test_job_path = os.path.join(this_file_path, "test_files", "test_plugin_job")
+test_task_path = os.path.join(this_file_path, "..", "..", "library", "testlib", "test_task")
+test_job_path = os.path.join(this_file_path, "..", "..", "library", "testlib", "test_job")
+test_job_par_path = os.path.join(this_file_path, "..", "..", "library", "testlib", "test_job_par")
 test_plugin_setup_files = os.path.join(this_file_path, "test_files", "plugin_files", "setup_files")
 test_plugins = os.path.join(this_file_path, "test_files", "plugin_files", "plugins")
 
 def mv_files_to_krem_temp_project(task, path):
-    test_task_output_path = os.path.realpath(os.path.join(path, p.TASKS_DIR_NAME, "test_plugin_task"))
-    test_job_output_path = os.path.realpath(os.path.join(path, p.JOBS_DIR_NAME, "test_plugin_job"))
+    test_task_output_path = os.path.realpath(os.path.join(path, p.TASKS_DIR_NAME, "test_task"))
+    test_job_output_path = os.path.realpath(os.path.join(path, p.JOBS_DIR_NAME, "test_job"))
+    test_job_par_output_path = os.path.realpath(os.path.join(path, p.JOBS_DIR_NAME, "test_job_par"))
     test_plugin_setup_output_path = os.path.realpath(os.path.join(path, p.CONFIG_DIR_NAME, "setup_files"))
     test_plugins_output_path = os.path.realpath(os.path.join(path, p.LIBRARY_DIR_NAME, "plugins"))
 
@@ -38,11 +40,13 @@ def mv_files_to_krem_temp_project(task, path):
         try:
             copy_tree(test_task_path, test_task_output_path)
             copy_tree(test_job_path, test_job_output_path)
+            copy_tree(test_job_par_path, test_job_par_output_path)
             copy_tree(test_plugin_setup_files, test_plugin_setup_output_path)
             copy_tree(test_plugins, test_plugins_output_path)
             print("Copied: ")
             print(test_task_path + " -> " + test_task_output_path)
             print(test_job_path + " -> " + test_job_output_path)
+            print(test_job_par_path + " -> " + test_job_par_output_path)
             print(test_plugin_setup_files + " -> " + test_plugin_setup_output_path)
             print(test_plugins + " -> " + test_plugins_output_path)        
         except Exception as e:
@@ -55,7 +59,7 @@ def mv_files_to_krem_temp_project(task, path):
 
     return(result)
 
-def execute_with_target_setup(path, target):
+def execute_with_target_setup(path, target, test_job):
     result = rc.PASS
     setup_path = os.path.join(p.CONFIG_DIR_NAME, "setup_files")
 
@@ -84,7 +88,7 @@ def execute_with_target_setup(path, target):
 
     # execute job
     if not result:
-        shell_return = f.shell_run(p.KREM_CMD + "run -j " + "test_plugin_job")
+        shell_return = f.shell_run("krem run -j " + test_job)
         if shell_return[0] != 0:
             result = rc.FAIL
 
@@ -97,10 +101,41 @@ def execute_with_target_setup(path, target):
 
     return(result)
 
+def test_pass_data(task, path):
+    start_directory = os.getcwd()
+
+    result = execute_with_target_setup(path, "setup_test_data.py", "test_job")
+    if not result:
+        if not os.path.isfile(os.path.join("output", "task_data_ok")):
+            print("Plugin failed to create file: " + "task_data_ok")
+            result = rc.FAIL
+        if not os.path.isfile(os.path.join("output", "job_data_ok")):
+            print("Plugin failed to create file: " + "job_data_ok")
+            result = rc.FAIL
+
+    os.chdir(start_directory)
+    print("Changed directory to " + str(start_directory))
+    return result
+
+def test_pass_data_parallel(task, path):
+    start_directory = os.getcwd()
+
+    result = execute_with_target_setup(path, "setup_test_data_parallel.py", "test_job_par")
+    if not result:
+        for i in range(50):
+            testline = "task_data_ok_" + str( (i + 1) )
+            if not os.path.isfile(os.path.join("output", testline)):
+                print("Plugin failed to create file: " + testline)
+                result = rc.FAIL
+
+    os.chdir(start_directory)
+    print("Changed directory to " + str(start_directory))
+    return result
+
 def test_all_hooks(task, path):
     start_directory = os.getcwd()
 
-    result = execute_with_target_setup(path, "setup_test_all_hooks.py")
+    result = execute_with_target_setup(path, "setup_test_all_hooks.py", "test_job")
     if not result:
         if not os.path.isfile(os.path.join("output", "job_start")):
             print("Plugin failed to create file: " + "job_start")
@@ -130,14 +165,14 @@ def test_all_hooks(task, path):
 
 def test_call_order(task, path):
     start_directory = os.getcwd()
-    result = execute_with_target_setup(path, "setup_test_call_order.py")
+    result = execute_with_target_setup(path, "setup_test_call_order.py", "test_job")
     if not result:
         if not os.path.isfile(os.path.join("output", "call_order_ok")):
             print("ERROR: Failed to verify call order")
             result = rc.FAIL
         else:
             print("Call order verified")
-
+        f.shell_run("cat output/test_job/latest/1_test_task__run__test_func_1/task.log")
     os.chdir(start_directory)
     print("Changed directory to " + str(start_directory))
     return result

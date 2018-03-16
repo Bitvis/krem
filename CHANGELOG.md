@@ -3,13 +3,31 @@
 
 -----------------------------------------
 
+### v2.2.0
+----------
+
+Released: 2018-03-16
+
+* Added CLI plugin interface.
+* _setup.sh_ migrated to _install.py_.
+* Added variable _plugin\_data_ to _Task()_ class. Use it for passing data between hook functions within a plugin.
+* Updated _KREM\_USER\_MANUAL.md_ according to the changes above.
+
+* Added level=None to execution logger, which logs the text without the [\<level\>] prefix. This feature allows plugin developers to beautify terminal/log output.
+* Improved log info on exceptions raised within a task.
+* Improved instructions on using _subprocess.Popen()_ within a task in the _Troubleshooting_ section in _KREM\_USER\_MANUAL.md_.
+* Tasks will now fail if any plugins fail when executing hook functions _pre\_task\_function\_call_ or _post\_task\_function\_call_.
+
+* **bugfix:** running job with empty job script resulted in no terminal output and '0' return code. The call now fails, and user is informed regarding the empty script.
+* **bugfix:** KREM commands failed if not located in project root directory. Can now execute KREM commands from anywhere within a project.
+* **bugfix:** Passing single arguments of type _int_ or _float_ to a task resulted in error.
+
 ### v2.1.1
 ----------
 
 Released: 2018-03-02
 
 * **bugfix:** running a job based on job number did not always result in running the requested job
-
 
 ### v2.1.0
 ----------

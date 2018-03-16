@@ -3,7 +3,7 @@
 ## \brief Default implementation of logger classes
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -48,44 +48,64 @@ class JobLoggerNative(loggers.JobLogger):
         self.log_level_color = {} 
         counter = 0
         for log_level in self.log_levels:
-            self.log_level_color[log_level] = log_level_color[counter]
-            counter = counter + 1
+            if log_level != 'none':
+                self.log_level_color[log_level] = log_level_color[counter]
+                counter = counter + 1
         
         self.log_level = 'info'
     
     ## Log/print job activity
-    def write(self, text, level):
+    def write(self, text, level=None):
         if self.check_log_level(level):             # Skip if log level is lower than current setting
             log_text = self.format_entry(text, level)
+
+            #If in task context, print to task log and redirect stdout to terminal
+            stdout_saveout = None
+            if sys.stdout != sys.__stdout__:
+                print(log_text)
+                stdout_saveout = sys.stdout
+                sys.stdout = sys.__stdout__
+
             self.set_text_color(level)
             print(log_text)
             self.reset_text_color()
 
-            log_text = self.strip_coloring(log_text)
+            #reset stdout
+            if stdout_saveout is not None:
+                sys.stdout = stdout_saveout
 
+            log_text = self.strip_coloring(log_text)
             self.write_to_log(log_text)
         return
 
+
     ## Applies formatting of log entry
     def format_entry(self, text, level):
-        return "[" + level.upper() + "]: " + text
+        format_string = text
+        if level is not None:
+            format_string = "[" + level.upper() + "]: " + format_string
+        return format_string
     
     ## Checks if level of log entry is ><= than current settings 
     def check_log_level(self, level):
         level_ok = False
-        nLevel = 0
-        nLog_level = 0
-        for c, l in enumerate(self.log_levels, 1):
-            if level == l:
-                nLevel = c
-            if self.log_level is l:
-                nLog_level = c
-        if nLevel is not 0 and nLog_level is not 0:
-            if nLevel >= nLog_level:
-                level_ok = True
+
+        if level is None:
+            level_ok = True
         else:
-            print("[INTERNAL_ERROR]: Provided log level not found")
-            exit(1)
+            nLevel = 0
+            nLog_level = 0
+            for c, l in enumerate(self.log_levels, 1):
+                if level == l:
+                    nLevel = c
+                if self.log_level is l:
+                    nLog_level = c
+            if nLevel is not 0 and nLog_level is not 0:
+                if nLevel >= nLog_level:
+                    level_ok = True
+            else:
+                print("[INTERNAL_ERROR]: Provided log level not found")
+                exit(1)
         return level_ok
    
     ## Set log level
@@ -98,7 +118,8 @@ class JobLoggerNative(loggers.JobLogger):
 
     ## Apply text color based on log level
     def set_text_color(self, log_level):
-        sys.stdout.write(self.log_level_color[log_level])
+        if log_level is not None:
+            sys.stdout.write(self.log_level_color[log_level])
 
     ## Reset text color
     def reset_text_color(self):

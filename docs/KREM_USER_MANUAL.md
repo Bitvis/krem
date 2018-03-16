@@ -39,6 +39,8 @@ We will provide some plugins, but anyone is more than welcome to contribute.
 
 * [Plugins](#plugins)
 
+* [Advanced features](#advanced-features)
+
 
 [FAQ](#faq)
 
@@ -59,7 +61,7 @@ git clone https://github.com/Bitvis/krem.git
 **install KREM**
 
 ```
-bash ./krem/setup.sh
+python ./krem/install.py
 source ~/.bashrc
 ```
 
@@ -112,47 +114,36 @@ As mentioned in the [Quick Start Guide](#quick-start-guide), KREM is installed b
 ```
 git clone https://github.com/Bitvis/krem.git
 
-bash ./krem/setup.sh
+python ./krem/install.py
 source ~/.bashrc
 ```
 
-In case the `setup.sh` fails and _krem_ is not in your PATH environment variable, you can add the following two lines to your _~/.bashrc_ file.
+In case the `install.py` fails and _krem_ is not in your PATH environment variable, you can add the following two lines to your _~/.bashrc_ file.
 
 ```
-export PATH=<krem installation>:$PATH
-export PYTHONPATH=<krem installation>:<krem installation>/krempack:$PYTHONPATH
+export PATH=<krem path>:$PATH
+export PYTHONPATH=<krem path>:<krem installation>/krempack:$PYTHONPATH
 ```
 ### Windows
 
 #### Gitbash
 
-Install Git Bash from here: https://gitforwindows.org and follow the instructions from Linux installation section. 
+Install Git Bash from: https://gitforwindows.org and follow the instructions from [Linux installation](#linux) section. 
 
 
 
 #### Cygwin
 
-Download Cygwin from https://www.cygwin.com and select the following packages in the installation:
+Download Cygwin from https://www.cygwin.com and select python2 or python3 interpreter package in the installation. Follow the instructions from [Linux installation](#linux) section. 
 
-* python2
-
-* dos2unix
-
-```
-git clone https://github.com/Bitvis/krem.git
-cd krem
-dos2unix.exe setup.sh
-./krem/setup.sh
-source ~/.bashrc
-```
 
 
 ## KREM selftest
 
-KREM comes with a selftest project. The test project is located in _\<krem installation\>/tests_. To execute selftest run:
+KREM comes with a selftest project. The test project is located in _\<krem path\>/tests_. To execute selftest run:
 
 ```
-cd <krem installation>/tests
+cd <krem path>/tests
 krem run -j integration_testing
 ```
 
@@ -162,7 +153,7 @@ KREM is installed correctly if all tests pass.
 ## Basic tutorial
 #### Creating a project
 
-Before you can start using KREM you must create a project. You can create as many projects you want in any location.
+Before you can start using KREM you must create a project. You can create as many projects as you want in any location.
 
 To create a project _project_foo_, run:
 
@@ -462,7 +453,7 @@ for i in range(10):
 
 ### Task result handling
 
-As mentioned in [JOb examples](#job-examples), function `job.wait_for_complete()`
+As mentioned in [Job examples](#job-examples), function `job.wait_for_complete()`
 returns return codes from all the parallel tasks in a parallel batch.
 To get return codes from all tasks in a job, both serial and parallel, executed up to a given point call
 function `job.get_task_results()`.
@@ -564,7 +555,7 @@ For an example of job progress see [Job progress](#job-progress).
 There are four job log levels: _debug_, _info_, _warn_ and _error_.
 The example in [Job progress](#job-progress) shows progress with log level set to _info_,
 which is the default.
-You can change job log level anywhere between `job.start()` and `job.end()` and you can change it
+You can change job log level anywhere between `job = kjob.Job(__file__, rc)` and `job.end()` and you can change it
 as many times as you wish.
 <p>The below is an example on changing the job log level to 'debug'
 
@@ -681,6 +672,9 @@ def power(task, turn_dict):
 ## Plugins
 
 Runtime plugins provide additional functionality to jobs and tasks.
+
+CLI plugins provide additional commands and arguments to the KREM command-line interface.
+
 ### Adding plugins
 
 The following instructions shows how to enable plugins in your jobs.
@@ -706,14 +700,23 @@ This file must contain the following:
 
 ```python
 from krempack.core import plugin
-from from library.plugins.krem_plugins.print_task_results import print_task_results
+from library.plugins.krem_plugins.print_task_results import print_task_results
+from library.plugins.krem_plugins.verify_jobs import verify_jobs
 
 def setup_plugins(plugin_handler):
     plugin_handler.register_plugin(print_task_results.PluginPrintTaskResults)
+
+def setup_cli_plugins(plugin_handler):
+    plugin_handler.register_plugin(verify_jobs.PluginVerifyJobs)
 ```
 
-where PluginPrintTaskResults is a class, located in _print_task_results.py_. Adding additional plugins
-is done in the same way as above.
+where setup_plugins is used for registering runtime plugins, and setup_cli_plugins is used for
+registering CLI plugins.
+
+PluginPrintTaskResults and PluginVerifyJobs are classes, located in _print_task_results.py_ and _verify_jobs.py_ respectively. 
+Adding additional plugins is done in the same way as above.
+
+No further action is required for enabling CLI plugins after they have been registered. 
 
 #### Enabling plugins in jobs
 
@@ -721,7 +724,7 @@ Import setup_plugins and call the `setup_plugins()` function from a job.
 `setup_plugins()` must be called before `job.start()`.
 
 ```python
-from library.setup import setup_plugins
+from library.setup import *
 
 if __name__ == '__main__':
 
@@ -731,6 +734,28 @@ if __name__ == '__main__':
 
     job.start()
 ```
+
+#### Plugin execution order
+
+For every hook, all registered plugins that has implemented the target hook function will be executed one after the other. Unless specified, the execution order is random. The execution order for each plugin in each hook can be configured in the functions _setup\_plugins()_ and _setup\_cli\_plugins()_. The example below shows how the execution order is configured for the hook _pre\_task\_function\_call_.
+
+```python
+def setup_plugins(plugin_handler):
+    plugin_handler.register_plugin(PluginA)
+    plugin_handler.register_plugin(PluginB)
+    plugin_handler.register_plugin(PluginC)
+    plugin_handler.register_plugin(PluginD)
+
+    plugin_handler.hooks["pre_task_function_call"].append_first_to_execute(PluginA)
+    plugin_handler.hooks["pre_task_function_call"].append_first_to_execute(PluginB)
+
+    plugin_handler.hooks["pre_task_function_call"].append_last_to_execute(PluginC)
+    plugin_handler.hooks["pre_task_function_call"].append_last_to_execute(PluginD)
+```
+For the hook _pre\_task\_function\_call_, the execution order will be: _PluginA_, _PluginB_, _PluginC_, then _PluginD_. Any other registered plugins with an implemented function for _pre\_task\_function\_call_ will be called somewhere in between _PluginB_ and _PluginC_, with no specific order. 
+
+Check the _README.md_ file, provided with each plugin, to see if it requires a specific order of execution for any of the hooks. 
+
 ### Plugin interface
 
 This section is intended for plugin developers.
@@ -796,7 +821,94 @@ Function `job_end()` is called at the end of a job.
 def job_end(self, job):
 ```
 
+#### cli_commands()
 
+Function `cli_commands()` is used for adding additional commands to KREM. Add path to target command script to the 'commands' dictionary, with the executable name of the command as the key.
+
+```python
+# Example from 'help-docs' plugin
+def cli_commands(self, commands):
+    commands["help"] = os.path.join(os.path.dirname(__file__), "help.cmd")
+```
+
+#### cli_\<cmd\>_setup_arguments()
+
+Function 'cli_\<cmd\>_setup_arguments()' is used for adding additional arguments to the original KREM commands, where \<cmd\> is the name of the command (eg. cli_init_setup_arguments()). The 'parser' input variable is of type argparse.ArgumentParser() from the argparse library. To add arguments to the existing command, create a new argument group and add the desired arguments.
+
+```python
+# Example from "task_lister" plugin
+def cli_list_setup_arguments(self, parser):
+    group = parser.add_argument_group()
+    group.add_argument("--job-tasks", nargs=1, help="Lists tasks used in target job")
+```
+
+#### cli_\<cmd\>_execute_arguments_pre_cmd()
+
+Function 'cli_\<cmd\>_execute_arguments_pre_cmd()' is executed before the inherent functionality of the target \<cmd\> is executed, where \<cmd\> is the name of the command (eg. cli_init_execute_arguments_pre_cmd()). The 'args' input variable are all arguments passed when calling the command. 
+
+```python
+# Example from "task_lister" plugin
+def cli_list_execute_arguments_pre_cmd(self, args):
+    if args.job_tasks is not None:
+        listlib.run(args.job_tasks[0])
+```
+
+#### cli_\<cmd\>_execute_arguments_post_cmd()
+
+Function 'cli_\<cmd\>_execute_arguments_post_cmd()' is executed after the inherent functionality of the target \<cmd\> has been executed, where \<cmd\> is the name of the command (eg. cli_init_execute_arguments_pre_cmd()). The 'args' input variable are all arguments passed when calling the command.
+
+```python
+def cli_list_execute_arguments_post_cmd(self, args):
+```
+
+# Advanced features
+
+## Returning variables from tasks to jobs
+
+So far you have been working with task functions returning return codes only.
+It is also possible to return additional variables. You can return any type of variable in any
+number and combination.
+
+#### Variables from serial tasks
+
+To return variables from tasks executed serially append the variables
+to the return statement as shown in the example below:
+
+```python
+def return_variables(task):
+    var = "return me too"
+    var_list = ["return", "me", "too"]
+    var_dict = {'return': 1, 'me': 2, 'too': 3}
+    return rc.PASS, var, var_list, var_dict
+```
+
+To receive the variables in a job do as shown in the example below:
+
+```python
+ret, var, var_list, var_dict = job.run_task_serial('task_foo', 'return_variables')
+
+print(var)
+print(var_list)
+print(var_dict)
+```
+
+#### Variables from parallel tasks
+
+To return variables from tasks executed in parallel, append the variables
+to the return statement as shown in [Variables from serial tasks](#variables-from-serial-tasks).
+
+To receive variables from tasks executed in parallel do as follows:
+
+```python
+job.run_task_parallel('test_vars_from_job_to_task', 'return_single_variable')
+job.run_task_parallel('test_vars_from_job_to_task', 'return_list_variable')
+job.run_task_parallel('test_vars_from_job_to_task', 'return_object')
+
+return_codes, return_vars = job.wait_for_complete()
+
+# get variables from the first parallel task above
+print(return_vars[0])
+```
 
 # FAQ
 
@@ -863,20 +975,23 @@ An example solution is shown below:
 
 ```python
 import subprocess
+import shlex
+
+def run_command(command):
+    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            print(output.strip().decode('utf-8'))
+    rc = process.poll()
+    return rc
+
 
 task_function(task):
 
-    output = []
-    out = subprocess.Popen("<command>", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    raw_output = out.communicate()
-    output.append(raw_output[0].decode('utf-8'))
-    output.append(raw_output[1].decode('utf-8'))
-
-    print(str(output[0]))
-    print(str(output[1]))
-
-    if out.returncode != 0:
-        err = rc.FAIL
+    ret = run_command("<your command here>")
 ```
 
 #### Job execution stops abruptly with no error messages.
@@ -903,7 +1018,7 @@ def run_without_arguments(task):
 
 # License
 
-Copyright (C) 2017  Bitvis AS
+Copyright (C) 2018  Bitvis AS
 
 This file is part of KREM.
 KREM is free software: you can redistribute it and/or modify

@@ -7,7 +7,7 @@ KREM_TESTS_PATH=$KREM_PATH/tests
 JOB_OUTPUT_PATH=$KREM_TESTS_PATH/output/integration_testing
 
 cd $KREM_PATH
-./setup.sh
+./install.py
 source ~/.bashrc
 
 

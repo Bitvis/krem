@@ -1,7 +1,7 @@
 
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -32,9 +32,16 @@ description:
 '''
 
 import argparse
+import os
 
 from krempack.core.commands import run
+from krempack.common import constants as c
+from krempack.core import plugin
+from krempack.core import cli_plugin
+from krempack.common import kremtree
 
+plugin_handler = plugin.PluginHandler('cli')
+plugins_initialized = False
 
 
 #######################################
@@ -42,6 +49,7 @@ from krempack.core.commands import run
 #          Uses library argparse              
 #######################################
 def readArgs():
+    global plugins_initialized
     parser = argparse.ArgumentParser(description=
                                     "Run a job, or selection of tasks",
                                     prog='krem run')
@@ -50,22 +58,34 @@ def readArgs():
     group.add_argument("-j", "--job", nargs=1, help="Execute target job")
 #Disabled for v1.0.0    group.add_argument("-c", "--tasks", nargs='+', help="Execute target tasks")
 
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_run_setup_arguments", {"parser": parser})
+
     args = parser.parse_args()
 
     return args
 
 
 if __name__ == '__main__':
+    ret = 0
+
+    if kremtree.find_krem_root(os.getcwd()):
+        plugins_initialized = cli_plugin.setup_cli_plugins(plugin_handler)
 
     args = readArgs()
-    
+
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_run_execute_arguments_pre_cmd", {"args": args})
+
     if args.job is not None:
         ret = run.run_job(args.job[0])
 #    elif args.tasks is not None:
 # Disabled for v1.0.0        ret = run.run_tasks('run_selected', args.tasks)        
-    else:
-        print("\nNo target provided. run 'krem.run --help' for more information\n")
-        exit(1)
+#    elif args.all:
+#        ret = run.run_all_tasks('run_all')
+
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_run_execute_arguments_post_cmd", {"args": args})
 
     exit(ret)        
 

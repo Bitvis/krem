@@ -117,3 +117,38 @@ class PluginCheckCallOrder(plugin.Plugin):
             print("ERROR: Plugin call order not as expeted.")
         else:
             write_output_file("call_order_ok", "test_line")
+
+class PluginPassData(plugin.Plugin):
+    name = "pass-data"
+
+    def __init__(self):
+        None
+
+    def job_start(self, job):
+        job.set_plugin_data(self.name, "data_to_job_end")
+
+    def pre_task_function_call(self, task):
+        task.set_plugin_data(self.name, "data_to_post_task")
+
+    def post_task_function_call(self, task):
+        if task.get_plugin_data(self.name) == "data_to_post_task":
+            write_output_file("task_data_ok", "test_line")
+
+    def job_end(self, job):
+        if job.get_plugin_data(self.name) == "data_to_job_end":
+            write_output_file("job_data_ok", "test_line")
+
+class PluginPassDataParallel(plugin.Plugin):
+    name = "pass-data-parallel"
+
+    def __init__(self):
+        None
+
+    def pre_task_function_call(self, task):
+        postfix = task.full_run_nr.split('_')[1]
+        task.set_plugin_data(self.name, "data_to_post_task_" + postfix)
+
+    def post_task_function_call(self, task):
+        postfix = task.full_run_nr.split('_')[1]
+        if task.get_plugin_data(self.name) == "data_to_post_task_" + postfix:
+            write_output_file("task_data_ok_" + postfix, "test_line")

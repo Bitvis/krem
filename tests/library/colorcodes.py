@@ -3,7 +3,7 @@
 ## \brief Implementation of color codes
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #

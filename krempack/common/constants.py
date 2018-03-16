@@ -2,7 +2,7 @@
 ## \brief Global constants
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -63,4 +63,7 @@ TASK_LOG = "task.log"
 INFO_FILE = "info"
 
 # Plugin info
-plugin_hooks = ["pre_job_start", "job_start", "pre_task_execution", "job_progress_text", "pre_task_function_call", "post_task_function_call", "post_task_execution", "job_end"]
+runtime_hooks = ["pre_job_start", "job_start", "pre_task_execution", "job_progress_text", "pre_task_function_call", "post_task_function_call", "post_task_execution", "job_end"]
+cli_hooks = ["cli_commands", "cli_init_setup_arguments", "cli_init_execute_arguments_pre_cmd", "cli_init_execute_arguments_post_cmd",
+             "cli_run_setup_arguments", "cli_run_execute_arguments_pre_cmd", "cli_run_execute_arguments_post_cmd",
+             "cli_list_setup_arguments", "cli_list_execute_arguments_pre_cmd", "cli_list_execute_arguments_post_cmd"]

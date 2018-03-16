@@ -1,7 +1,7 @@
 
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -32,10 +32,18 @@ description:
 '''
 import argparse
 import os
+
+from krempack.common import kremtree
 from krempack.core.commands import init
 from krempack.common import constants as c
+from krempack.core import plugin
+from krempack.core import cli_plugin
+
+plugin_handler = plugin.PluginHandler('cli')
+plugins_initialized = False
 
 def readArgs():
+    global plugins_initialized
     parser = argparse.ArgumentParser(description=
                                     "KREM initialization: \n"
                                     "Initializes a new target (KREM project (default), task or job)\n",
@@ -46,30 +54,42 @@ def readArgs():
     group.add_argument("-t", "--task", nargs=1, help="Initialize new task with given name")
     group.add_argument("-j", "--job", nargs=1, help="Initialize new job with given name")
 
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_init_setup_arguments", {"parser": parser})
+
     args = parser.parse_args()
 
     return args
 
 
-
-
 if __name__ == '__main__':
+    deploy_arg = False
+
+    if kremtree.find_krem_root(os.getcwd()):
+        plugins_initialized = cli_plugin.setup_cli_plugins(plugin_handler)
 
     args = readArgs()
+
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_init_execute_arguments_pre_cmd", {"args": args})
 
     if args.project is not None:
         template = c.TEMPLATE_PROJECT
         target = args.project
+        deploy_arg = True
     elif args.task is not None:
         template = c.TEMPLATE_TASK
         target = args.task[0]
+        deploy_arg = True
     elif args.job is not None:
         template = c.TEMPLATE_JOB
         target = args.job[0]
-    else:
-        print("\nNo target provided. run 'krem.init --help' for more information\n")
-        exit(1)
+        deploy_arg = True
 
-    init.deploy_template(template,target)
+    if deploy_arg:
+        init.deploy_template(template,target)
+
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_init_execute_arguments_post_cmd", {"args": args})
 
 

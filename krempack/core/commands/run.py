@@ -3,7 +3,7 @@
 ## \brief Executes target job/task
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -76,9 +76,14 @@ def run_job(target):
         current_env = os.environ.copy()
         current_env['PYTHONPATH'] += os.pathsep + os.path.join(os.path.dirname("."))
         target_path = os.path.join(jobs_path, target, c.TEMPLATE_JOB_SCRIPT)
+
+        if os.stat(target_path).st_size == 0:
+            print("[ERROR]: Target job-script is empty.")
+            exit(1)
+
         try:
             ret = subprocess.call(['python', target_path], env=current_env)
-        except Exception as e:
+        except Exception:
             print("Invalid job: " + str(target))
         
     return ret

@@ -3,6 +3,7 @@ import sys
 import os
 import subprocess
 import re
+import shlex
 
 from library.returncodes import *
 from library.testlib import parameters as p
@@ -17,27 +18,30 @@ def compare_lists(list_to_verify, list2):
     return missing_from_list
 
 def shell_run(cmd, print_enable=True):
-    output = []
+    all_output = ""
     print("SHELL CMD: '" + str(cmd) + "'")
-    cmd_list = cmd.split()
-    out = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    raw_output = out.communicate()
-    output.append(raw_output[0].decode('utf-8'))
-    output.append(raw_output[1].decode('utf-8'))
 
-    if out.returncode != 0:
+    process = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output = process.stdout.readline()
+        output = output.decode('utf-8')
+        output.replace("\n", "\n*\t")
+
+        all_output += output
+
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            if print_enable:
+                print("*\t" + output)
+
+    returncode = process.poll()
+
+    if returncode != 0:
         print("ERROR: Cmd '" + str(cmd) + "' failed.")
-        print(str(output[1]))
-        
-    if print_enable:
-        stdout = output[0].replace("\n", "\n*\t")
-        stderr = output[1].replace("\n", "\n*\t")
-        print("SHELL STDOUT:")
-        print("*\t" + str(stdout))
-        print("SHELL STDERR:")
-        print("*\t" + str(stderr))
-   
-    return (out.returncode, output[0], output[1])
+
+    return [returncode, all_output]
+
 
 def find_output_job_instance(output_job_path):
     job_instance = None

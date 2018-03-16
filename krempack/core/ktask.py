@@ -3,7 +3,7 @@
 ## \brief Implementation of the Task class and TaskAction interface
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -88,13 +88,15 @@ class Task(TaskData):
         self.target_function = None
         self.run_nr = run_nr
         self.action = None
-        self.arguments = []
+        self.arguments = ""
         self.task_result = None
+        self.task_return_vars = None
         self.initializer = None
         self.plugin_handler = None
         self.job_output_path = None
         self.output_path = None
         self.logger = None
+        self.plugin_data = {}
         
         self.config = kconfig.Config()
 
@@ -124,12 +126,18 @@ class Task(TaskData):
         
     def set_task_result(self, task_result):
         self.task_result = task_result
-        
+
+    def set_task_return_vars(self, task_return_vars):
+        self.task_return_vars = task_return_vars
+
     def set_plugin_handler(self, plugin_handler):
         self.plugin_handler = plugin_handler
         
     def set_logger(self, logger):
         self.logger = logger
+
+    def set_plugin_data(self, plugin_name, data):
+        self.plugin_data[plugin_name] = data
 
     def get_target(self):
         return self.target
@@ -147,24 +155,25 @@ class Task(TaskData):
         return self.action        
         
     def get_arguments(self):
-        if len(self.arguments) is not 0:
-            return self.arguments
-        else:
-            return ""
+        return self.arguments
 
-    
     def get_initializer(self):
         return self.initializer        
     
     def get_task_result(self):
         return self.task_result
-    
+
+    def get_task_return_vars(self):
+        return self.task_return_vars
+
     def get_plugin_handler(self):
         return self.plugin_handler
     
     def get_logger(self):
         return self.logger
 
+    def get_plugin_data(self, plugin_name):
+        return self.plugin_data[plugin_name]
 ###############################################
 #   Class containing how the task should be 
 #       executed and verified

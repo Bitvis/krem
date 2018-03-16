@@ -4,7 +4,7 @@ from krempack.core import plugin
 Use following import if krem_plugins repo is placed in library,
 or add other plugins in the same way
 '''
-#from library.plugins.krem_plugins.print_task_results.print_task_results import PluginPrintTaskResults
+from library.plugins import test_plugins
 
 '''
 to get krem_plugins: 
@@ -28,7 +28,7 @@ def setup_cli_plugins(plugin_handler):
     Uncomment the following to enable some of the plugins from krem_plugins,
     or add other plugins in the same way
     '''
-    #plugin_handler.register_plugin(FooPlugin)
+    plugin_handler.register_plugin(test_plugins.TestPluginCliHooks)
 
     pass
 

@@ -1,7 +1,7 @@
 
 
 '''
-# Copyright (C) 2017  Bitvis AS
+# Copyright (C) 2018  Bitvis AS
 #
 # This file is part of KREM.
 #
@@ -35,7 +35,15 @@ import os
 from krempack.core.commands import list
 from krempack.common import constants as c
 
+from krempack.core import plugin
+from krempack.core import cli_plugin
+from krempack.common import kremtree
+
+plugin_handler = plugin.PluginHandler('cli')
+plugins_initialized = False
+
 def readArgs():
+    global plugins_initialized
     parser = argparse.ArgumentParser(description=
                                     "List available targets:",
                                     prog='krem list') 
@@ -45,21 +53,29 @@ def readArgs():
     group.add_argument("-t", "--task", default=False, action='store_true', help="List available tasks")
     group.add_argument("-j", "--job", default=False, action='store_true', help="List available jobs")
 
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_list_setup_arguments", {"parser": parser})
+
     args = parser.parse_args()
 
     return args
 
 if __name__ == '__main__':
+    if kremtree.find_krem_root(os.getcwd()):
+        plugins_initialized = cli_plugin.setup_cli_plugins(plugin_handler)
 
     args = readArgs()
+
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_list_execute_arguments_pre_cmd", {"args": args})
 
     if args.task:
         list.list_tasks()
     elif args.job:
         list.list_jobs()
-    else:
-        print("\nNo target provided. run 'krem.list --help' for more information\n")
-        exit(1)
+
+    if plugins_initialized:
+        plugin_handler.execute_hook("cli_list_execute_arguments_post_cmd", {"args": args})
 
 
 

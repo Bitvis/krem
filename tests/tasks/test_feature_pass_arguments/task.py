@@ -90,3 +90,37 @@ def run_with_argument_dict(task, **args):
 
 
     return(result)
+
+
+def run_with_argument_int(task, args):
+
+    print ("executing function 'run_with_argument_int'")
+
+    result = rc.FAIL
+    if type(args) is int:
+        if args == p.test_arg_int:
+            print("arguments passed from job to task OK")
+            print(str(args))
+            result = rc.PASS
+
+    if result == rc.FAIL:
+        print("ERROR: expected int")
+
+    return(result)
+
+
+def run_with_argument_float(task, args):
+
+    print ("executing function 'run_with_argument_float'")
+
+    result = rc.FAIL
+    if type(args) is float:
+        if args == p.test_arg_float:
+            print("arguments passed from job to task OK")
+            print(str(args))
+            result = rc.PASS
+
+    if result == rc.FAIL:
+        print("ERROR: expected float")
+
+    return(result)
