@@ -35,7 +35,7 @@ from krempack.common import kremtree
 from krempack.core import plugin
 from krempack.core import cli_plugin
 
-KREM_VERSION = '2.2.1'
+KREM_VERSION = '2.2.2'
 
 
 # Each command is a script located in dir 'CMD_PATH'

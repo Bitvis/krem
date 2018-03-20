@@ -760,9 +760,11 @@ Check the _README.md_ file, provided with each plugin, to see if it requires a s
 
 This section is intended for plugin developers.
 
+#### Task and job plugins
+
 A plugin must implement at least one of the below functions.
 
-#### job_start()
+##### job_start()
 
 Function `job_start()` is called at the beginning of a job.
 
@@ -770,7 +772,7 @@ Function `job_start()` is called at the beginning of a job.
 def job_start(self, job):
 ```
 
-#### pre_task_execution()
+##### pre_task_execution()
 
 Function `pre_task_execution()` is called just before a task is executed.
 
@@ -778,7 +780,7 @@ Function `pre_task_execution()` is called just before a task is executed.
 def pre_task_execution(self, task, job):
 ```
 
-#### job_progress_text()
+##### job_progress_text()
 
 Function `job_progress_text` is called just before the progress is output to the terminal.
 
@@ -786,7 +788,7 @@ Function `job_progress_text` is called just before the progress is output to the
 def  job_progress_text(self,task, progress_text)
 ```
 
-#### pre_task_function_call()
+##### pre_task_function_call()
 
 Function `pre_task_function_call()` is called just before a task function is called.
 
@@ -794,7 +796,7 @@ Function `pre_task_function_call()` is called just before a task function is cal
 def pre_task_function_call(self, task):
 ```
 
-#### post_task_function_call()
+##### post_task_function_call()
 
 Function `post_task_function_call()` is called right after a task function has returned.
 
@@ -802,7 +804,7 @@ Function `post_task_function_call()` is called right after a task function has r
 def post_task_function_call(self, task):
 ```
 
-#### post_task_execution()
+##### post_task_execution()
 
 In case of serial tasks, function `post_task_execution()` is called after a task has been executed
 and the task result is ready.
@@ -813,7 +815,7 @@ parallel tasks have finished.
 def post_task_execution(self, task, job):
 ```
 
-#### job_end()
+##### job_end()
 
 Function `job_end()` is called at the end of a job.
 
@@ -821,19 +823,21 @@ Function `job_end()` is called at the end of a job.
 def job_end(self, job):
 ```
 
-#### cli_commands()
+#### CLI plugins
+
+##### cli_commands()
 
 Function `cli_commands()` is used for adding additional commands to KREM. Add path to target command script to the 'commands' dictionary, with the executable name of the command as the key.
 
 ```python
 # Example from 'help-docs' plugin
 def cli_commands(self, commands):
-    commands["help"] = os.path.join(os.path.dirname(__file__), "help.cmd")
+    commands["help"] = os.path.join(os.path.dirname(__file__), "help_cmd.py")
 ```
 
-#### cli_\<cmd\>_setup_arguments()
+##### cli_\<cmd\>_setup_arguments()
 
-Function 'cli_\<cmd\>_setup_arguments()' is used for adding additional arguments to the original KREM commands, where \<cmd\> is the name of the command (eg. cli_init_setup_arguments()). The 'parser' input variable is of type argparse.ArgumentParser() from the argparse library. To add arguments to the existing command, create a new argument group and add the desired arguments.
+Function `cli_<cmd>_setup_arguments()` is used for adding additional arguments to the original KREM commands, where _\<cmd\>_ is the name of the command, eg. `cli_init_setup_arguments()`. The `parser` input variable is of type argparse.ArgumentParser() from the argparse library. To add arguments to the existing command, create a new argument group and add the desired arguments.
 
 ```python
 # Example from "task_lister" plugin
@@ -842,20 +846,20 @@ def cli_list_setup_arguments(self, parser):
     group.add_argument("--job-tasks", nargs=1, help="Lists tasks used in target job")
 ```
 
-#### cli_\<cmd\>_execute_arguments_pre_cmd()
+##### cli_\<cmd\>_execute_arguments_pre_cmd()
 
-Function 'cli_\<cmd\>_execute_arguments_pre_cmd()' is executed before the inherent functionality of the target \<cmd\> is executed, where \<cmd\> is the name of the command (eg. cli_init_execute_arguments_pre_cmd()). The 'args' input variable are all arguments passed when calling the command. 
+Function `cli_<cmd>_execute_arguments_pre_cmd()` is executed before the inherent functionality of the target _\<cmd\>_ is executed, where _\<cmd\>_ is the name of the command, eg. `cli_init_execute_arguments_pre_cmd()`. The `args` input variable are all arguments passed when calling the command. 
 
 ```python
 # Example from "task_lister" plugin
 def cli_list_execute_arguments_pre_cmd(self, args):
     if args.job_tasks is not None:
-        listlib.run(args.job_tasks[0])
+        task_lister.run(args.job_tasks[0])
 ```
 
-#### cli_\<cmd\>_execute_arguments_post_cmd()
+##### cli_\<cmd\>_execute_arguments_post_cmd()
 
-Function 'cli_\<cmd\>_execute_arguments_post_cmd()' is executed after the inherent functionality of the target \<cmd\> has been executed, where \<cmd\> is the name of the command (eg. cli_init_execute_arguments_pre_cmd()). The 'args' input variable are all arguments passed when calling the command.
+Function `cli_<cmd>_execute_arguments_post_cmd()` is executed after the inherent functionality of the target _\<cmd\>_ has been executed, where _\<cmd\>_ is the name of the command, eg. `cli_init_execute_arguments_pre_cmd()`. The `args` input variable are all arguments passed when calling the command.
 
 ```python
 def cli_list_execute_arguments_post_cmd(self, args):

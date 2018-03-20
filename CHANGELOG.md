@@ -3,6 +3,15 @@
 
 -----------------------------------------
 
+### v2.2.2
+----------
+
+Released: 2018-03-20
+
+* renamed CLI plugin files <...>.cmd -> <...>_cmd.py
+* updated user manual
+
+
 ### v2.2.1
 ----------
 

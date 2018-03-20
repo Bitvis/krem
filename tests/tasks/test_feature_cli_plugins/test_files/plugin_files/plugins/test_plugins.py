@@ -11,7 +11,7 @@ class TestPluginCliHooks(plugin.Plugin):
         None
  
     def cli_commands(self, commands):
-        commands["test"] = os.path.join(os.path.dirname(__file__), 'test.cmd')
+        commands["test"] = os.path.join(os.path.dirname(__file__), 'test_cmd.py')
 
     def cli_init_setup_arguments(self, parser):
         group = parser.add_argument_group()
