@@ -18,7 +18,7 @@ def run(task):
     else: 
         temp_task_created = True
         
-    if not result:
+    if result == rc.PASS:
         if not os.path.isfile(os.path.join(temp_task_path, p.TASK_SCRIPT)):
             result = rc.FAIL
             print("ERROR: Failed to deploy task template file: " + p.TASK_SCRIPT)

@@ -22,7 +22,7 @@ def run(task):
     if shell_return[0] != 0:
         result = rc.FAIL
     
-    if not result:
+    if result == rc.PASS:
         # Get list of jobs
         print("Jobs listed:")
         
@@ -44,7 +44,7 @@ def run(task):
                 jobs_in_dir.append(job)
 
     # compile results
-    if not result:
+    if result == rc.PASS:
         missing_from_list = f.compare_lists(listed_jobs, jobs_in_dir)
         missing_from_jobs_dir = f.compare_lists(jobs_in_dir, listed_jobs)
         

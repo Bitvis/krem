@@ -67,9 +67,8 @@ def run_named_arguments(task, test_arg_1, test_arg_2):
         print("ERROR: test_arg_2 does not match expected")
         result = rc.FAIL
     
-    if not result:
-        print("arguments passed from job to task OK")
-        result = rc.PASS
+    if result == rc.PASS:
+        print("arguments passed from job to task OK")        
         
     return result
 

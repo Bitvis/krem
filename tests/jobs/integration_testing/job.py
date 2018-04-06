@@ -28,7 +28,7 @@ if __name__ == '__main__':
     job.run_task_serial('test_feature_pass_arguments', 'run_argument_single', arguments=p.test_arg_1)
     job.run_task_serial('test_feature_pass_arguments', 'run_with_argument_int', arguments=p.test_arg_int)
     job.run_task_serial('test_feature_pass_arguments', 'run_with_argument_float', arguments=p.test_arg_float)
-
+    job.run_task_serial('test_feature_pass_arguments', 'run_argument_list', arguments=[p.test_arg_1, p.test_arg_2])
 
     ret, var = job.run_task_serial('test_vars_from_task_to_job', 'return_single_variable')
     job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_single_variable'), ('var_ret', ret), ('var', var)])
@@ -50,39 +50,32 @@ if __name__ == '__main__':
     job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_list_variable'), ('var_ret', ret), ('var', return_vars[1])])
     job.run_task_serial('test_vars_from_task_to_job', 'check_vars', arguments=[('test', 'return_object'), ('var_ret', ret), ('var', return_vars[2])])
 
+    job.run_task_serial('remove_temp_krem_project', 'run')
 
-    arg_list_rc = job.run_task_serial('test_feature_pass_arguments', 'run_argument_list', arguments=[p.test_arg_1, p.test_arg_2])
+    if rc.PASS == job.run_task_serial('create_temp_krem_project', 'run'):
+        if rc.PASS == job.run_task_serial('test_initiated_project', 'run'):
+            job.run_task_serial('test_output_file_structure', 'run')
+            job.run_task_serial('test_output_run_log', 'run')
+            job.run_task_serial('test_output_task_log', 'run')
+            job.run_task_serial('test_output_results_log', 'run')
 
+            job.run_task_serial('test_syntax_error_in_task', 'run_with_syntax_error')
 
-    if not arg_list_rc:
-        temp_project_path = ("path", p.TEMP_PROJECT_PATH)
+            if rc.PASS == job.run_task_serial('test_feature_runtime_plugins', 'mv_files_to_temp_krem_project'):
+                time.sleep(1) # Fail to create output dir for task if same timestamp
+                job.run_task_serial('test_feature_runtime_plugins', 'test_all_hooks')
+                time.sleep(1)
+                job.run_task_serial('test_feature_runtime_plugins', 'test_call_order')
+                time.sleep(1)
+                job.run_task_serial('test_feature_runtime_plugins', 'test_pass_data')
+                time.sleep(1)
+                job.run_task_serial('test_feature_runtime_plugins', 'test_pass_data_parallel')
 
-        job.run_task_serial('remove_temp_krem_project', 'run', arguments=[temp_project_path])
-
-        if not job.run_task_serial('create_temp_krem_project', 'run', arguments=[temp_project_path]):
-            if not job.run_task_serial('test_initiated_project', 'run', arguments=[temp_project_path]):
-                job.run_task_serial('test_output_file_structure', 'run', arguments=[temp_project_path])
-                job.run_task_serial('test_output_run_log', 'run', arguments=[temp_project_path])
-                job.run_task_serial('test_output_task_log', 'run', arguments=[temp_project_path])
-                job.run_task_serial('test_output_results_log', 'run', arguments=[temp_project_path])
-
-                job.run_task_serial('test_syntax_error_in_task', 'run_with_syntax_error', arguments=[temp_project_path])
-
-                if not job.run_task_serial('test_feature_runtime_plugins', 'mv_files_to_krem_temp_project', arguments=[temp_project_path]):
-                    time.sleep(1) # Fail to create output dir for task if same timestamp
-                    job.run_task_serial('test_feature_runtime_plugins', 'test_all_hooks', arguments=[temp_project_path])
-                    time.sleep(1)
-                    job.run_task_serial('test_feature_runtime_plugins', 'test_call_order', arguments=[temp_project_path])
-                    time.sleep(1)
-                    job.run_task_serial('test_feature_runtime_plugins', 'test_pass_data', arguments=[temp_project_path])
-                    time.sleep(1)
-                    job.run_task_serial('test_feature_runtime_plugins', 'test_pass_data_parallel', arguments=[temp_project_path])
-
-                if not job.run_task_serial('test_feature_cli_plugins', 'mv_files_to_krem_temp_project', arguments=[temp_project_path]):
-                    time.sleep(1) # Fail to create output dir for task if same timestamp
-                    job.run_task_serial('test_feature_cli_plugins', 'test_command_hook', arguments=[temp_project_path])
-                    job.run_task_serial('test_feature_cli_plugins', 'test_argument_setup_hooks', arguments=[temp_project_path])
-                    job.run_task_serial('test_feature_cli_plugins', 'test_argument_execute_hooks', arguments=[temp_project_path])
+            if rc.PASS == job.run_task_serial('test_feature_cli_plugins', 'mv_files_to_temp_krem_project'):
+                time.sleep(1) # Fail to create output dir for task if same timestamp
+                job.run_task_serial('test_feature_cli_plugins', 'test_command_hook')
+                job.run_task_serial('test_feature_cli_plugins', 'test_argument_setup_hooks')
+                job.run_task_serial('test_feature_cli_plugins', 'test_argument_execute_hooks')
 
     job.run_task_serial('test_command_init_job', 'run')
     job.run_task_serial('test_command_init_task', 'run')

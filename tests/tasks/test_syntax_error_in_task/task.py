@@ -13,7 +13,7 @@ test_job_path = os.path.join(this_file_path, "test_files", "test_syntax_error_jo
 
 
 
-def mv_files_to_krem_temp_project(path):
+def mv_files_to_temp_krem_project(path):
     test_task_output_path = os.path.realpath(os.path.join(path, p.TASKS_DIR_NAME, "test_syntax_error_task"))
     test_job_output_path = os.path.realpath(os.path.join(path, p.JOBS_DIR_NAME, "test_syntax_error_job"))
 
@@ -27,7 +27,7 @@ def mv_files_to_krem_temp_project(path):
         result = rc.FAIL
         print("ERROR: Failed to change current directory to: '" + path + "'")
 
-    if not result:
+    if result == rc.PASS:
         print("Changed directory to " + str(path))
 
         try:
@@ -47,22 +47,22 @@ def mv_files_to_krem_temp_project(path):
     return (result)
 
 
-def run_with_syntax_error(task, path):
-    path = os.path.abspath(path)
+def run_with_syntax_error(task):
+    
     result = rc.PASS
     start_directory = os.getcwd()
 
     # Navigate to temp project dir and run
     try:
-        os.chdir(path)
+        os.chdir(p.TEMP_PROJECT_PATH)
     except Exception:
         result = rc.FAIL
-        print("ERROR: Failed to change current directory to: '" + path + "'")
+        print("ERROR: Failed to change current directory to: '" + p.TEMP_PROJECT_PATH + "'")
 
-    result = mv_files_to_krem_temp_project(path)
+    result = mv_files_to_temp_krem_project(p.TEMP_PROJECT_PATH)
 
-    if not result:
-        print("Changed directory to " + str(path))
+    if result == rc.PASS:
+        print("Changed directory to " + str(p.TEMP_PROJECT_PATH))
         shell_return = f.shell_run(p.KREM_CMD +  p.CMD_RUN + " " + p.CMD_RUN_OPTION_JOB + " " + "test_syntax_error_job")
 
         #we expect the above command to fail since we are running a job with a task with syntax error

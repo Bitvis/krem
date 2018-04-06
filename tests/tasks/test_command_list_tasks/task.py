@@ -22,7 +22,7 @@ def run(task):
     if shell_return[0] != 0:
         result = rc.FAIL
     
-    if not result:
+    if result == rc.PASS:
         # Get list of tasks
         print("tasks listed:")
         
@@ -39,12 +39,13 @@ def run(task):
         tasks_dir = os.listdir(p.TEST_PROJECT_TASKS_DIR) 
         print("\nTasks present in tasks directory:")        
         for task in tasks_dir:
-            if os.path.isdir(os.path.join(p.TEST_PROJECT_TASKS_DIR, task)):
-                print(task)
-                tasks_in_dir.append(task)
+            if task != "__pycache__":
+                if os.path.isdir(os.path.join(p.TEST_PROJECT_TASKS_DIR, task)):
+                    print(task)
+                    tasks_in_dir.append(task)
 
     # compile results
-    if not result:
+    if result == rc.PASS:
         missing_from_list = f.compare_lists(listed_tasks, tasks_in_dir)
         missing_from_tasks_dir = f.compare_lists(tasks_in_dir, listed_tasks)
         

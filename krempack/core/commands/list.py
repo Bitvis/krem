@@ -62,21 +62,24 @@ def list_tasks():
 
         idx = 0
         for task in tasks_list:
-            missingFiles = []
-            printstring = "[" + str(idx) + "]\t" + str(task)
-            # List scripts in task, to quickly see if something is missing
-            task_path = os.path.join(tasks_path, task)
+            # ignore __pychache__ directory
+            if task != "__pycache__":
+                missingFiles = []
+                printstring = "[" + str(idx) + "]\t" + str(task)
+                # List scripts in task, to quickly see if something is missing
+                task_path = os.path.join(tasks_path, task)
 
-            if not os.path.isfile(os.path.join(task_path, c.TEMPLATE_TASK_FILE)):
-                missingFiles.append(c.TEMPLATE_TASK_FILE)
-            if not os.path.isfile(os.path.join(task_path, c.INIT_PACKAGE_FILE)):
-                missingFiles.append(c.INIT_PACKAGE_FILE)
+            
+                if not os.path.isfile(os.path.join(task_path, c.TEMPLATE_TASK_FILE)):
+                    missingFiles.append(c.TEMPLATE_TASK_FILE)
+                if not os.path.isfile(os.path.join(task_path, c.INIT_PACKAGE_FILE)):
+                    missingFiles.append(c.INIT_PACKAGE_FILE)
                     
-            if len(missingFiles) > 0:
-                printstring = printstring + '\t' + "missing files: " + str(missingFiles)
+                if len(missingFiles) > 0:
+                    printstring = printstring + '\t' + "missing files: " + str(missingFiles)
 
-            print(printstring)
-            idx = idx + 1
+                print(printstring)
+                idx = idx + 1
         print("")
         
 

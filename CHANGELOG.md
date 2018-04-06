@@ -3,25 +3,39 @@
 
 -----------------------------------------
 
-### v2.2.2
+### v2.3.0
+
+Released: 2018-04-06
+
+* **bugfix:** now returns error code 1 on attempt to run a non existing job
+* **bugfix:** naming a task _test_ or the same as any module from the python standard library no longer causes exception
+* template README.md file is deployed togheter with template task and job files when running 
+  ```krem init -t <task>``` and ```krem init -j <job>```
+* added self tests
+* _output_ directory is recreated if missing
+* added directory _.krem_project_ to new projects for future use
+* updated user manual
+
 ----------
+
+### v2.2.2
 
 Released: 2018-03-20
 
 * renamed CLI plugin files <...>.cmd -> <...>_cmd.py
 * updated user manual
 
+----------
 
 ### v2.2.1
-----------
 
 Released: 2018-03-16
 
 * Added feature to return variables from tasks to job, not only return code.   (this feature was already present in v2.2.0, but was not mentioned in the changelog)
 * renamed selftest case _test_vars_from_job_to_task_ to _test_vars_from_task_to_job_
 
-
 ### v2.2.0
+
 ----------
 
 Released: 2018-03-16
@@ -41,15 +55,18 @@ Released: 2018-03-16
 * **bugfix:** KREM commands failed if not located in project root directory. Can now execute KREM commands from anywhere within a project.
 * **bugfix:** Passing single arguments of type _int_ or _float_ to a task resulted in error.
 
-### v2.1.1
 ----------
+
+### v2.1.1
+
 
 Released: 2018-03-02
 
 * **bugfix:** running a job based on job number did not always result in running the requested job
 
-### v2.1.0
 ----------
+
+### v2.1.0
 
 Released: 2018-03-02
 
@@ -64,18 +81,18 @@ Released: 2018-03-02
 * Added support for running KREM in Git Bash in Windows
 * Added support for running KREM in Cygwin
 
-
+----------
 
 ### v2.0.0
-----------
+
 
 Released: 2018-02-14
 
 - renamed task function 'variables' to 'arguments'
 
+----------
 
 ### v1.4.0
-----------
 
 Released: 2018-02-13
 
@@ -119,37 +136,34 @@ Released: 2018-02-13
   Note that job.get_job_result() resturned a single return code while job.get_task_results() return a list of all task results
 
 
-### v1.3.3
-
 ----------
+
+### v1.3.3
 
 Released: 2018-01-31
 
 - **bugfix:** task object and not task name is now passed to pre_task_execution plugin entry-point
 
+----------
 
 ### v1.3.2
-
-----------
 
 Released: 2018-01-26
 
 * krem no longer hang when running several parallel tasks
 
+----------
 
 ### v1.3.1
-
-----------
 
 Released: 2018-01-23
 
 * template task and job can be run without modifications
 * updated MANUAL
 
+----------
 
 ### v1.3.0
-
-----------
 
 Released: 2018-01-19
 
@@ -167,37 +181,36 @@ Released: 2018-01-19
 
 	`task_post_processing` -> `post_task_execution`
 
-### v1.2.1
+----------
 
-------
+### v1.2.1
 
 Released: 2018-01-19
 
 * added library/plugins
 * updated MANUAL
 
+----------
 
 ### v1.2.0
-
-----------
 
 Released: 2018-01-10
 
 * Added setup.py to library directory in project template with default function for plugin setup.
 * Added call to plugin setup in job template
 
-### v1.1.0
-
 ----------
+
+### v1.1.0
 
 Released: 2018-01-08
 
 * Added plugin entrypoints "pre_task_setup" and "task_post_processing"
 * **bug fix:** Task results set before plugin entrypoint "post_task_execution"
 
-### v1.0.0
-
 ----------
+
+### v1.0.0
 
 Released: 2018-08-01
 

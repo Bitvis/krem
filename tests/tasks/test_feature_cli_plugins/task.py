@@ -15,22 +15,22 @@ test_plugin_setup_file = os.path.join(this_file_path, "test_files", "plugin_file
 test_plugins = os.path.join(this_file_path, "test_files", "plugin_files", "plugins")
 
 
-def mv_files_to_krem_temp_project(task, path):
-    test_library_output_path = os.path.realpath(os.path.join(path, p.LIBRARY_DIR_NAME))
-    test_plugins_output_path = os.path.realpath(os.path.join(path, p.LIBRARY_DIR_NAME, "plugins"))
+def mv_files_to_temp_krem_project(task):
+    test_library_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.LIBRARY_DIR_NAME))
+    test_plugins_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.LIBRARY_DIR_NAME, "plugins"))
 
     result = rc.PASS
     start_directory = os.getcwd()
 
     # Navigate to temp project dir and run
     try:
-        os.chdir(path)
+        os.chdir(p.TEMP_PROJECT_PATH)
     except Exception:
         result = rc.FAIL
-        print("ERROR: Failed to change current directory to: '" + path + "'")
+        print("ERROR: Failed to change current directory to: '" + p.TEMP_PROJECT_PATH + "'")
 
-    if not result:
-        print("Changed directory to " + str(path))
+    if result == rc.PASS:
+        print("Changed directory to " + str(p.TEMP_PROJECT_PATH))
 
         try:
             os.remove(os.path.join(test_library_output_path, "setup.py"))
@@ -63,7 +63,7 @@ def run_and_check(cmd, expected):
         print("[ERROR]: Failed to run command: " + str(cmd))
         result = rc.FAIL
 
-    if not result:
+    if result == rc.PASS:
         for exp in expected:
             if exp not in shell_return[1]:
                 print("[ERROR]: Unexpected command error. Expected '" + str(expected) + "'. Got '" +
@@ -72,45 +72,45 @@ def run_and_check(cmd, expected):
 
     return result
 
-def test_command_hook(task, path):
+def test_command_hook(task):
     result = rc.PASS
     start_dir = os.getcwd()
     # Navigate to temp project dir and run
     try:
-        os.chdir(path)
+        os.chdir(p.TEMP_PROJECT_PATH)
     except Exception:
         result = rc.FAIL
-        print("ERROR: Failed to change current directory to: '" + path + "'")
+        print("ERROR: Failed to change current directory to: '" + p.TEMP_PROJECT_PATH + "'")
 
     # Rename target setup file to "setup.py"
-    if not result:
-        print("Changed directory to " + str(path))
+    if result == rc.PASS:
+        print("Changed directory to " + str(p.TEMP_PROJECT_PATH))
 
         result = run_and_check("krem test", ["Running test command"])
 
     try:
         os.chdir(start_dir)
     except Exception:
-        if not result:
+        if result == rc.PASS:
             result = rc.UNSTABLE
         print("ERROR: Failed to return to start directory.")
 
     return result
 
-def test_argument_setup_hooks(task, path):
+def test_argument_setup_hooks(task):
     result = rc.PASS
     start_dir = os.getcwd()
 
     # Navigate to temp project dir and run
     try:
-        os.chdir(path)
+        os.chdir(p.TEMP_PROJECT_PATH)
     except Exception:
         result = rc.FAIL
-        print("ERROR: Failed to change current directory to: '" + path + "'")
+        print("ERROR: Failed to change current directory to: '" + p.TEMP_PROJECT_PATH + "'")
 
     # Rename target setup file to "setup.py"
-    if not result:
-        print("Changed directory to " + str(path))
+    if result == rc.PASS:
+        print("Changed directory to " + str(p.TEMP_PROJECT_PATH))
 
         init_result = run_and_check("krem init --help", ["test command help string"])
         run_result = run_and_check("krem run --help", ["test command help string"])
@@ -122,26 +122,26 @@ def test_argument_setup_hooks(task, path):
     try:
         os.chdir(start_dir)
     except Exception:
-        if not result:
+        if result == rc.PASS:
             result = rc.UNSTABLE
         print("ERROR: Failed to return to start directory.")
 
     return result
 
-def test_argument_execute_hooks(task, path):
+def test_argument_execute_hooks(task):
     result = rc.PASS
     start_dir = os.getcwd()
 
     # Navigate to temp project dir and run
     try:
-        os.chdir(path)
+        os.chdir(p.TEMP_PROJECT_PATH)
     except Exception:
         result = rc.FAIL
-        print("ERROR: Failed to change current directory to: '" + path + "'")
+        print("ERROR: Failed to change current directory to: '" + p.TEMP_PROJECT_PATH + "'")
 
     # Rename target setup file to "setup.py"
-    if not result:
-        print("Changed directory to " + str(path))
+    if result == rc.PASS:
+        print("Changed directory to " + str(p.TEMP_PROJECT_PATH))
 
         init_result = run_and_check("krem init -x", ["Executing pre_cmd hook", "Received argument in pre_cmd", "Executing post_cmd hook", "Received argument in post_cmd"])
         run_result = run_and_check("krem run -x", ["Executing pre_cmd hook", "Received argument in pre_cmd", "Executing post_cmd hook", "Received argument in post_cmd"])
@@ -153,7 +153,7 @@ def test_argument_execute_hooks(task, path):
     try:
         os.chdir(start_dir)
     except Exception:
-        if not result:
+        if result == rc.PASS:
             result = rc.UNSTABLE
         print("ERROR: Failed to return to start directory.")
 

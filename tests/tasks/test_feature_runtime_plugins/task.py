@@ -16,12 +16,12 @@ test_job_par_path = os.path.join(this_file_path, "..", "..", "library", "testlib
 test_plugin_setup_files = os.path.join(this_file_path, "test_files", "plugin_files", "setup_files")
 test_plugins = os.path.join(this_file_path, "test_files", "plugin_files", "plugins")
 
-def mv_files_to_krem_temp_project(task, path):
-    test_task_output_path = os.path.realpath(os.path.join(path, p.TASKS_DIR_NAME, "test_task"))
-    test_job_output_path = os.path.realpath(os.path.join(path, p.JOBS_DIR_NAME, "test_job"))
-    test_job_par_output_path = os.path.realpath(os.path.join(path, p.JOBS_DIR_NAME, "test_job_par"))
-    test_plugin_setup_output_path = os.path.realpath(os.path.join(path, p.CONFIG_DIR_NAME, "setup_files"))
-    test_plugins_output_path = os.path.realpath(os.path.join(path, p.LIBRARY_DIR_NAME, "plugins"))
+def mv_files_to_temp_krem_project(task):
+    test_task_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.TASKS_DIR_NAME, "test_task"))
+    test_job_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.JOBS_DIR_NAME, "test_job"))
+    test_job_par_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.JOBS_DIR_NAME, "test_job_par"))
+    test_plugin_setup_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.CONFIG_DIR_NAME, "setup_files"))
+    test_plugins_output_path = os.path.realpath(os.path.join(p.TEMP_PROJECT_PATH, p.LIBRARY_DIR_NAME, "plugins"))
 
 
     result = rc.PASS
@@ -29,13 +29,13 @@ def mv_files_to_krem_temp_project(task, path):
 
     # Navigate to temp project dir and run
     try:
-        os.chdir(path)
+        os.chdir(p.TEMP_PROJECT_PATH)
     except Exception:
         result = rc.FAIL
-        print("ERROR: Failed to change current directory to: '" + path + "'")
+        print("ERROR: Failed to change current directory to: '" + p.TEMP_PROJECT_PATH + "'")
 
-    if not result:
-        print("Changed directory to " + str(path))
+    if result == rc.PASS:
+        print("Changed directory to " + str(p.TEMP_PROJECT_PATH))
         
         try:
             copy_tree(test_task_path, test_task_output_path)
@@ -72,7 +72,7 @@ def execute_with_target_setup(path, target, test_job):
 
 
     # Rename target setup file to "setup.py"
-    if not result:
+    if result == rc.PASS:
         print("Changed directory to " + str(path))
 
         try:
@@ -87,7 +87,7 @@ def execute_with_target_setup(path, target, test_job):
             os.remove(os.path.join(setup_path, "setup.pyc"))
 
     # execute job
-    if not result:
+    if result == rc.PASS:
         shell_return = f.shell_run("krem run -j " + test_job)
         if shell_return[0] != 0:
             result = rc.FAIL
@@ -101,11 +101,11 @@ def execute_with_target_setup(path, target, test_job):
 
     return(result)
 
-def test_pass_data(task, path):
+def test_pass_data(task):
     start_directory = os.getcwd()
 
-    result = execute_with_target_setup(path, "setup_test_data.py", "test_job")
-    if not result:
+    result = execute_with_target_setup(p.TEMP_PROJECT_PATH, "setup_test_data.py", "test_job")
+    if result == rc.PASS:
         if not os.path.isfile(os.path.join("output", "task_data_ok")):
             print("Plugin failed to create file: " + "task_data_ok")
             result = rc.FAIL
@@ -117,11 +117,11 @@ def test_pass_data(task, path):
     print("Changed directory to " + str(start_directory))
     return result
 
-def test_pass_data_parallel(task, path):
+def test_pass_data_parallel(task):
     start_directory = os.getcwd()
 
-    result = execute_with_target_setup(path, "setup_test_data_parallel.py", "test_job_par")
-    if not result:
+    result = execute_with_target_setup(p.TEMP_PROJECT_PATH, "setup_test_data_parallel.py", "test_job_par")
+    if result == rc.PASS:
         for i in range(50):
             testline = "task_data_ok_" + str( (i + 1) )
             if not os.path.isfile(os.path.join("output", testline)):
@@ -132,11 +132,11 @@ def test_pass_data_parallel(task, path):
     print("Changed directory to " + str(start_directory))
     return result
 
-def test_all_hooks(task, path):
+def test_all_hooks(task):
     start_directory = os.getcwd()
 
-    result = execute_with_target_setup(path, "setup_test_all_hooks.py", "test_job")
-    if not result:
+    result = execute_with_target_setup(p.TEMP_PROJECT_PATH, "setup_test_all_hooks.py", "test_job")
+    if result == rc.PASS:
         if not os.path.isfile(os.path.join("output", "job_start")):
             print("Plugin failed to create file: " + "job_start")
             result = rc.FAIL
@@ -163,10 +163,10 @@ def test_all_hooks(task, path):
     print("Changed directory to " + str(start_directory))
     return result
 
-def test_call_order(task, path):
+def test_call_order(task):
     start_directory = os.getcwd()
-    result = execute_with_target_setup(path, "setup_test_call_order.py", "test_job")
-    if not result:
+    result = execute_with_target_setup(p.TEMP_PROJECT_PATH, "setup_test_call_order.py", "test_job")
+    if result == rc.PASS:
         if not os.path.isfile(os.path.join("output", "call_order_ok")):
             print("ERROR: Failed to verify call order")
             result = rc.FAIL

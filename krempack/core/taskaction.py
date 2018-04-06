@@ -175,11 +175,11 @@ class TaskAction():
         module_path = self.task.get_target_module_path()
 
         if module_path is not None and module_name is not None:
-            module_path = os.path.dirname(os.path.realpath(module_path)) + '/../'
-            sys.path.append(module_path)
-
-            try:
-                module = import_module(module_name)
+            try:               
+                # import module directly rather than adding it to sys.module_path
+                # this will allow tasks named os, sys, test, etc to be accepted
+                task_module = c.TASK_FILE.replace(".py", "")
+                module = import_module("."+task_module, c.PROJECT_TASKS_DIR + "." + self.task.get_task_name())
             except Exception:
                 self.log.write(traceback.format_exc(-1), 'error')
                 exit(1)
@@ -196,7 +196,7 @@ class TaskAction():
             function = getattr(module, self.task.get_target_function())
         except:
             self.task.get_logger().disable(self.task)
-            self.log.write("function '" + str(self.task.get_target_function()) + "' in task '" + str(self.task.get_run_name()) + "' not found", 'error')
+            self.log.write("function '" + str(self.task.get_target_function()) + "' in task '" + str(self.task.get_task_name()) + "' not found", 'error')
             exit(1)
 
         return function

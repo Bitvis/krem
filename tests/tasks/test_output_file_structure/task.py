@@ -7,9 +7,9 @@ from library.testlib import parameters as p
 from library.testlib import functions as f
 
 
-def run(task, path):
+def run(task):
 
-    path = os.path.abspath(os.path.join(path, p.OUTPUT_DIR_NAME))
+    path = os.path.abspath(os.path.join(p.TEMP_PROJECT_PATH, p.OUTPUT_DIR_NAME))
     result = rc.PASS
     start_directory = os.getcwd()
 
@@ -25,7 +25,7 @@ def run(task, path):
         result = rc.FAIL
         print("ERROR: Failed to change current directory to: '" + path + "'")
         
-    if not result:
+    if result == rc.PASS:
         print("Changed directory to " + str(path))
         print("Checking contents of directory: " + str(path))
         

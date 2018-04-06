@@ -49,14 +49,18 @@ def check_if_job_number(target):
 
 # Run job file
 def run_job(target):
-    ret = 0
-    err = False
+    ret = 0        
+
     jobs_path = kremtree.find_common_dir(c.PROJECT_JOBS_DIR)
+    
+    if not os.path.isdir(os.path.join(kremtree.find_krem_root("./"), c.PROJECT_OUTPUT_DIR)):        
+        templatePath = os.path.join(c.TEMPLATES_PATH, c.TEMPLATE_PROJECT)
+        shutil.copytree(os.path.join(templatePath, c.PROJECT_OUTPUT_DIR), os.path.join(kremtree.find_krem_root("./"), c.PROJECT_OUTPUT_DIR))
     
     idx = 0
     job_num = check_if_job_number(target)
     
-    if not job_num < 0:
+    if job_num >= 0:
         jobs = kremtree.list_dir(jobs_path)
         jobs.sort()
         if not job_num + 1 > len(jobs):
@@ -65,17 +69,22 @@ def run_job(target):
                     print("\nRunning job: " + str(job) +"\n")
                     target = job
                     break
-                idx = idx + 1
-
+                idx = idx + 1                
         else:
-            print("Invalid job number: " + str(job_num))
-            err = True
-            
-    if not err:
+            print("Invalid job number: " + str(job_num))   
+            ret = 1         
+
+    if ret == 0:
+        target_path = os.path.join(jobs_path, target, c.TEMPLATE_JOB_SCRIPT)
+        if not os.path.exists(target_path):
+            print("Invalid job: " + str(target)) 
+            ret = 1
+
+
+    if ret == 0:
         #this will add project path to sys path so jobs can acces library, config, etc
         current_env = os.environ.copy()
         current_env['PYTHONPATH'] += os.pathsep + os.path.join(os.path.dirname("."))
-        target_path = os.path.join(jobs_path, target, c.TEMPLATE_JOB_SCRIPT)
 
         if os.stat(target_path).st_size == 0:
             print("[ERROR]: Target job-script is empty.")
@@ -85,5 +94,6 @@ def run_job(target):
             ret = subprocess.call(['python', target_path], env=current_env)
         except Exception:
             print("Invalid job: " + str(target))
-        
+            ret = 1        
+
     return ret

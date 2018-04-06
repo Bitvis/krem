@@ -44,7 +44,7 @@ def list_dir(target_path):
 ###############################################
 #    Returns relative path to target common 
 #        directory within the project
-#        directory (eg. 'library'). 
+#        directory (eg. 'library', 'jobs', 'tasks'). 
 ###############################################
 def find_common_dir(target):
     kremRoot = find_krem_root('./')
@@ -70,8 +70,8 @@ def find_krem_root(startPath):
  
         found = True
         for target in c.PROJECT_DEFAULT_DIRS:
-                if target not in entries:
-                    found = False
+            if target not in entries:                
+                found = False
         if found is True:
             returnValue = os.path.relpath(startPath)
         else:
@@ -89,4 +89,4 @@ def find_krem_root(startPath):
 def is_root_path(path):
     return os.path.abspath(path) == os.path.abspath(os.sep)
 
-#if __name__ == '__main__':
+

@@ -929,11 +929,14 @@ It's up to you. All tasks returns a return code (directly from `job.run_task_ser
 Let your job check the return code from the tasks to see if job execution should continue or not.
 
 #### Can I copy my project to other locations or even to other machines?
-Yes, as long as you copy the whole directory structure.
+Yes, as long as you copy the whole directory structure. Make sure to delte all .pyc files after copying to the new location.
 
 #### Can I copy my jobs and tasks to other projects?
 Yes. Remember to also copy modules and plugins, from the _library_ directory,
-used by your jobs and tasks.
+used by your jobs and tasks. Make sure to delte all .pyc files after copying to the new location.
+
+#### Can I copy my plugins to other locations or even to other machines?
+Yes, as long as you copy the whole directory structure. Make sure to delte all .pyc files after copying to the new location.
 
 #### How do I uninstall KREM?
 Simply remove the KREM directory.
